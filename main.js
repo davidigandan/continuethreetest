@@ -14,7 +14,7 @@ document.body.appendChild( renderer.domElement );
 // Contorls
  const controls = new OrbitControls(camera, renderer.domElement);
  
-const datapoints = [1,2,3]
+const datapoints = [1] //add more datapoint for demopoint1
  const segments =[]
  for (let i=0; i<datapoints.length; i++) {
     segments.push(makeSegment());
@@ -22,7 +22,7 @@ const datapoints = [1,2,3]
  
 
 segments.forEach( (segment,i)=> {
-    // segment.position.set(10*i,0,0);
+    // segment.position.set(10*i,0,0);  //uncomment for demopoint2
     scene.add(segment);
 })
 
