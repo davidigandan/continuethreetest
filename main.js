@@ -14,10 +14,14 @@ document.body.appendChild( renderer.domElement );
 // Contorls
  const controls = new OrbitControls(camera, renderer.domElement);
  
-const datapoints = [1] //add more datapoint for demopoint1
+const datapoints = [1,2,3] //add more datapoint for demopoint1
  const segments =[]
  for (let i=0; i<datapoints.length; i++) {
-    segments.push(makeSegment());
+    // segments.push(makeSegment(20,5, Math.PI/4, Math.PI/3));
+    const arrayOfMeshes= makeSegment(20,5, Math.PI/4, Math.PI/3);
+    arrayOfMeshes.forEach(mesh => {
+        segments.push(mesh);
+    })
  }
  
 
