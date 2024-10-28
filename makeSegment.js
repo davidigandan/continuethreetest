@@ -4,60 +4,47 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import RenderBundle from 'three/src/renderers/common/RenderBundle.js';
 
 export default function makeSegment(length=20, width=5, topAngle, bottomAngle) {
- // Create cylinder mesh
-//  const topEndCylinderGeometry= new THREE.CylinderGeometry( 2.5, 2.5, 8, 32 );
-//  const topEndCylinderMaterial = new THREE.MeshBasicMaterial( { color: 0x0000FF } );
-//  const topEndCylinder = new THREE.Mesh( topEndCylinderGeometry, topEndCylinderMaterial );
-//  topEndCylinder.position.set(0,11,0); //topendcylinder height is 5, so position must be half hight plus height of body
-//  topEndCylinder.updateMatrix();
-//  scene.add(topEndCylinder);
 
-//  // Create cube
- const cubeWidth = width/Math.cos(topAngle)
- const cubeGeometry = new THREE.BoxGeometry(cubeWidth,cubeWidth,cubeWidth);
- const cubeMaterial = new THREE.MeshBasicMaterial( { color: "red" } );
- const cube = new THREE.Mesh( cubeGeometry, cubeMaterial);
-//  cube.position.set(0,length/2,0); //position on top right of cylinder
- cube.geometry.translate(0,cubeWidth/2,0)
- cube.geometry.rotateZ(topAngle); //rotate cube 
- cube.geometry.translate(0,length/2,0)
+// Create topCube
+const topCubeWidth = (width/Math.cos(topAngle))
+const topCubeGeometry = new THREE.BoxGeometry(topCubeWidth,topCubeWidth,topCubeWidth);
+const topCubeMaterial = new THREE.MeshBasicMaterial( { color: "red" } );
+const topCube = new THREE.Mesh( topCubeGeometry, topCubeMaterial);
+
+topCube.geometry.translate(0,topCubeWidth/2,0)
+topCube.geometry.rotateZ(topAngle); //rotate topCube 
+topCube.geometry.translate(0,length/2,0)
 
 
 // Generate cylinder body
-const precutLength= (width/2)* (Math.tan(topAngle) + Math.tan(bottomAngle)) + length;
-console.log("width", width, "topAngle", topAngle, "bottomAngle", bottomAngle, "length", length);
+const precutLength = (width/2*Math.tan(topAngle)) + (width/2*Math.tan(bottomAngle)) + length
 const geometry = new THREE.CylinderGeometry( width/2, width/2, precutLength, 32 );
 const material = new THREE.MeshBasicMaterial( { color: "green" } );
 const cylinder = new THREE.Mesh( geometry, material );
 
+// Adjust for 3JS recentring
+const currYPosition = precutLength/2
+const correctYPosition = length/2 + (width/2*Math.tan(topAngle)) //length plus top-excess
+const yAdjustment= correctYPosition-currYPosition
+cylinder.geometry.translate(0,yAdjustment,0)
 
-const topTip = CSG.intersect(cylinder, cube);
+const topTip = CSG.intersect(cylinder, topCube);
 topTip.material = new THREE.MeshBasicMaterial({color: "orange"});
 
 const slicedCylinder = CSG.subtract(cylinder, topTip);
-cube.geometry.translate(0, -length/2, 0)
-cube.geometry.rotateZ(-topAngle + bottomAngle + Math.PI)
-cube.geometry.translate(0, -length/2 , 0)
+topCube.geometry.translate(0, -length/2, 0)
+topCube.geometry.rotateZ(-topAngle + bottomAngle + Math.PI)
+topCube.geometry.translate(0, -length/2 , 0)
 
 
 
-// cube.rotateZ(-topAngle + bottomAngle + Math.PI)
-// cube.rotateZ(-topAngle);
-// cube.translateY(-length)
 
-const bottomTip = CSG.intersect(cylinder,cube);
+const bottomTip = CSG.intersect(cylinder,topCube);
 bottomTip.material = topTip.material
 const finalCylinder = CSG.subtract(slicedCylinder, bottomTip);
-// finalCylinder.material = new Th
-
-
-// // Assemble Gemetries
-// const mesh1= slicedCylinder.clone();
-// mesh1.material = new THREE.MeshBasicMaterial({color: "yellow"})
-// mesh1.position.set(0,14,0);
 
 
 
-return [finalCylinder/*, cylinder, slicedCylinder ,,cube*/]
+return [  slicedCylinder/*, slicedCylinder ,,toptopCube*/]
 }
 

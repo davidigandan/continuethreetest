@@ -23,14 +23,39 @@ const datapoints = [1,2,3] //add more datapoint for demopoint1
         segments.push(mesh);
     })
  }
- 
 
 segments.forEach( (segment,i)=> {
     // segment.position.set(10*i,0,0);  //uncomment for demopoint2
     scene.add(segment);
 })
 
- scene.add( new THREE.AxesHelper(50) );
+// Create a line segment at y = 10
+const lineMaterial = new THREE.LineBasicMaterial({ color: "black" });
+const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-120, 10, 0),
+    new THREE.Vector3(11,10, 0)
+]);
+const line = new THREE.Line(lineGeometry, lineMaterial);
+
+// line 2
+const width=5
+const topAngle = Math.PI/4
+const length = 10
+const lineGeometry2 = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-120,(width/2*Math.tan(topAngle)) +length , 0),
+    new THREE.Vector3(11,(width/2*Math.tan(topAngle)) +length, 0)
+]);
+const line2 = new THREE.Line(lineGeometry2, lineMaterial);
+
+
+
+
+
+// Add the line to the scene
+scene.add(line, line2);
+
+
+ scene.add( new THREE.AxesHelper(11) );
 
 
  function animate() {
