@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import  makeSegment  from './makeSegment'
 
-// returns an array of meshes that are positioned as a line
+// returns an array of meshes incorrecly positioned
 
 export default function buildSegments(lineWidth=5, lineColor="green", dataset=[(0,1), (1,2), (2,3), (3,4)]) {
     const material = new THREE.MeshBasicMaterial( { color: lineColor } )

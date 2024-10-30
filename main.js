@@ -17,8 +17,9 @@ const controls = new OrbitControls(camera, renderer.domElement);
 // Segment material
 const color = new THREE.MeshBasicMaterial( { color: "pink" } )
 
+console.log(renderer.info.memory)
 const meshSegment= makeSegment(20,5, Math.PI/4, Math.PI/3, color);
-
+console.log(renderer.info.memory)
 scene.add(meshSegment); 
  
 function animate() {
@@ -29,8 +30,6 @@ function animate() {
 animate();
 
 // Mesh output disposal
-scene.remove(meshSegment);
-meshSegment.geometry.dispose();
-meshSegment.material.dispose();
+console.log('Current memory use:', renderer.info.memory)
 
 

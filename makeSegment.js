@@ -51,11 +51,13 @@ slicedCylinder.geometry.translate(0,bottomToOrigin,0)
 slicedCylinder.material = material;
 
 // Disposal
-cylinder.geometry.dispose();
-topCube.geometry.dispose();
-bottomCube.geometry.dispose();
-topTip.geometry.dispose();
-bottomTip.geometry.dispose();
+// cylinder.geometry.dispose();
+// topCube.geometry.dispose();
+// bottomCube.geometry.dispose();
+// topTip.geometry.dispose();
+// bottomTip.geometry.dispose();
+
+// console.log('makeSegment memory use: ', renderer.info.memory);
 return slicedCylinder
 }
 
