@@ -12,23 +12,25 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 // Contorls
- const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 
-const segments=[]
-    // segments.push(makeSegment(20,5, Math.PI/4, Math.PI/3));
-    const arrayOfMeshes= makeSegment(20,5, Math.PI/4, Math.PI/3);
-    arrayOfMeshes.forEach(mesh => {
-        segments.push(mesh)});
-    
-segments.forEach( (segment,i)=> {
-    // segment.position.set(10*i,0,0);  //uncomment for demopoint2
-    scene.add(segment);
-})
+// Segment material
+const color = new THREE.MeshBasicMaterial( { color: "pink" } )
 
+const meshSegment= makeSegment(20,5, Math.PI/4, Math.PI/3, color);
+
+scene.add(meshSegment); 
  
- function animate() {
+function animate() {
 	requestAnimationFrame(animate);
 	controls.update();
 	renderer.render( scene, camera );
  }
 animate();
+
+// Mesh output disposal
+scene.remove(meshSegment);
+meshSegment.geometry.dispose();
+meshSegment.material.dispose();
+
+

@@ -11,7 +11,7 @@ const bottomExcess = radius*Math.tan(bottomAngle);
 // Generate cylinder body
 const precutLength = topExcess + bottomExcess + length
 const geometry = new THREE.CylinderGeometry( radius, radius, precutLength, 36 );
-const cylinder = new THREE.Mesh( geometry, material );
+const cylinder = new THREE.Mesh( geometry );
 
 // Create topCube
 const topCubeWidth = (width/Math.cos(topAngle))
@@ -24,6 +24,7 @@ topCube.geometry.translate(0,topCubeWidth/2,0)
 topCube.geometry.rotateZ(topAngle); //rotate topCube 
 const topShift = (length+bottomExcess-topExcess) /2
 topCube.geometry.translate(0,topShift,0) 
+
 
 // Top subtraction
 const topTip = CSG.intersect(cylinder, topCube);
@@ -47,6 +48,14 @@ slicedCylinder = CSG.subtract(slicedCylinder, bottomTip);
 // Move bottom to world origin
 const bottomToOrigin = (precutLength/2) - bottomExcess
 slicedCylinder.geometry.translate(0,bottomToOrigin,0)
-return [slicedCylinder]
+slicedCylinder.material = material;
+
+// Disposal
+cylinder.geometry.dispose();
+topCube.geometry.dispose();
+bottomCube.geometry.dispose();
+topTip.geometry.dispose();
+bottomTip.geometry.dispose();
+return slicedCylinder
 }
 
