@@ -34,15 +34,16 @@ function buildLine(lineWidth=5, lineColor="green", dataset=[[0,0], [40,40], [80,
         const deltaX1To2 = x2 - x1
         const deltaY1To2 = y2 - y1
 
-        const nextSegmentAngle = Math.PI - Math.atan2(deltaY1To2,deltaX1To2)
+        const nextSegmentAngle = Math.PI - Math.abs(Math.atan2(deltaY1To2, deltaX1To2))
         const relativeAngle = nextSegmentAngle - currentSegmentAngle
 
         const topCutAngle = relativeAngle/2
         console.log(
             `Current deltaX1To2 should be 40. It is: ${deltaX1To2}. \n
-            Current deltaY1To2 should be 40. It is: ${deltaY1To2} (alternating).\n
+            Current deltaY1To2 should be 40. It is: ${deltaY1To2} (alternating). The sum is ${y2} -${y1}\n
+            Computing nextSegmentAngle: 180 - ${Math.abs(Math.atan2(deltaY1To2,deltaX1To2))} \n
             Current nextSegmentAngle should be 135. It is: ${nextSegmentAngle*(180/Math.PI)}. \n
-            Relative angles should be 90. They are ${relativeAngle}\n`
+            Relative angles should be 90. They are ${relativeAngle*(180/Math.PI)}\n`
             
         )
         return topCutAngle
