@@ -8,7 +8,8 @@ const radius = width/2
 const topExcess = Math.abs(radius*Math.tan(topAngle));
 const bottomExcess = Math.abs(radius*Math.tan(bottomAngle));
 
-console.log(`topAngle is: ${topAngle*Math.PI}, topExcess is: ${topExcess}. bottomExcess is ${bottomExcess}.`)
+// Helpful for debugging
+// console.log(`topAngle is: ${topAngle*Math.PI}, topExcess is: ${topExcess}. bottomExcess is ${bottomExcess}.`)
 
 // Generate cylinder body
 const precutLength = topExcess + bottomExcess + length
@@ -67,11 +68,9 @@ bottomTip.geometry.dispose();
 slicedCylinderTemp.geometry.dispose();
 
 // console.log('makeSegment memory use: ', renderer.info.memory);
-return [
-    slicedCylinder, 
-    // Extra items helpful for debugging
+return slicedCylinder
+    // Extra items helpful for debugging (return an array for extra items)
     // topCube, 
     // topTip
-]
 }
 
