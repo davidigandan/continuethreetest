@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import  makeSegment  from './makeSegment'
+import { color } from 'three/webgpu';
 
 // Setup scene, camera, renderer
 const scene = new THREE.Scene();
@@ -38,14 +39,13 @@ function buildLine(lineWidth=5, lineColor="green", dataset=[[0,0], [40,40], [80,
         const relativeAngle = nextSegmentAngle - currentSegmentAngle
 
         const topCutAngle = relativeAngle/2
-        console.log(
-            `Current deltaX1To2 should be 40. It is: ${deltaX1To2}. \n
-            Current deltaY1To2 should be 40. It is: ${deltaY1To2} (alternating). The sum is ${y2} -${y1}\n
-            Computing nextSegmentAngle: 180 - ${Math.abs(Math.atan2(deltaY1To2,deltaX1To2))} \n
-            Current nextSegmentAngle should be 135. It is: ${nextSegmentAngle*(180/Math.PI)}. \n
-            Relative angles should be 90. They are ${relativeAngle*(180/Math.PI)}\n`
-            
-        )
+        // console.log(
+        //     `Current deltaX1To2 should be 40. It is: ${deltaX1To2}. \n
+        //     Current deltaY1To2 should be 40. It is: ${deltaY1To2} (alternating). The sum is ${y2} -${y1}\n
+        //     Computing nextSegmentAngle: 180 - ${Math.abs(Math.atan2(deltaY1To2,deltaX1To2))} \n
+        //     Current nextSegmentAngle should be 135. It is: ${nextSegmentAngle*(180/Math.PI)}. \n
+        //     Relative angles should be 90. They are ${relativeAngle*(180/Math.PI)}\n`
+        // )
         return topCutAngle
     }
     
@@ -65,37 +65,41 @@ function buildLine(lineWidth=5, lineColor="green", dataset=[[0,0], [40,40], [80,
         // calculate length to next datapoint(currentSegmentLength)
         let currentSegmentLength;
         currentSegmentLength = Math.hypot(deltaXTo1, deltaYTo1);
-        console.log(`Current segment length is ${currentSegmentLength}`)
+        // console.log(`Current segment length is ${currentSegmentLength}`)
 
         // calculate angle of current segment
-        const currentSegmentAngle =  Math.asin(deltaXTo1/currentSegmentLength)
+        // const currentSegmentAngle =  Math.atan(deltaXTo1/deltaYTo1) //the breaking change
+        const currentSegmentAngle = Math.asin(deltaXTo1/currentSegmentLength)
 
         let topCutAngle;
         let bottomCutAngle;
 
         
         if ( i===0 ) { 
+            console.log(`Current positionX is: ${dataset[i][0]}, Current postionY is: ${dataset[i][1]}`)
             bottomCutAngle = 0
             console.log(dataset[i+1], dataset[i+2], currentSegmentAngle*(180/Math.PI))
             topCutAngle = getTopCut(dataset[i+1], dataset[i+2], currentSegmentAngle)
-            console.log(`topCutAngle on first segment is ${topCutAngle}`)
+            // console.log(`topCutAngle on first segment is ${topCutAngle}`)
             bottomCutHelper = topCutAngle
         } else if (i>0 && i<dataset.length-2) {
+            console.log(`Current positionX is: ${dataset[i][0]}, Current postionY is: ${dataset[i][1]}`)
             bottomCutAngle = bottomCutHelper
-            console.log(`Initial bottomCutHelper ${bottomCutHelper}`)
+            // console.log(`Initial bottomCutHelper ${bottomCutHelper}`)
             console.log(dataset[i+1], dataset[i+2], currentSegmentAngle*(180/Math.PI))
             topCutAngle = getTopCut(dataset[i+1], dataset[i+2], currentSegmentAngle)
             bottomCutHelper = topCutAngle
-            console.log(`After update bottomCutHelper${bottomCutHelper}, topCutAngle ${topCutAngle}` )
+            // console.log(`After update bottomCutHelper${bottomCutHelper}, topCutAngle ${topCutAngle}` )
         } else if (i===dataset.length-2) {
+            console.log(`Current positionX is: ${dataset[i][0]}, Current postionY is: ${dataset[i][1]}`)
             console.log(dataset[i+1], dataset[i+2], currentSegmentAngle*(180/Math.PI))
             bottomCutAngle = bottomCutHelper
             topCutAngle = 0   
         }
 
         const segment = makeSegment(currentSegmentLength,lineWidth,topCutAngle,bottomCutAngle,material)
-        
-        segment.rotateZ(currentSegmentAngle)
+        console.log(`currentSegmentAngles is ${currentSegmentAngle*(180/Math.PI)}`);
+        segment.rotateZ(-currentSegmentAngle)
         segment.position.x=dataset[i][0]
         segment.position.y=dataset[i][1]
 
@@ -108,15 +112,16 @@ function buildLine(lineWidth=5, lineColor="green", dataset=[[0,0], [40,40], [80,
 
 
 const meshes = buildLine(1,"red", dataset)
+const colorWheel = ["red","orange","yellow", "green", "blue", "purple", "black"]
 
 meshes.forEach((mesh,i) => {
-    // mesh.geometry.rotateZ()
-    
+    console.log(`Is it a mesh?: ${mesh instanceof THREE.Mesh}`)
+    mesh.material = new THREE.MeshBasicMaterial({ color: colorWheel[i] })
     scene.add(mesh);
 })
 
-
-const axesHelper = new THREE.AxesHelper(10)
+const axesHelper = new THREE.AxesHelper(40)
+scene.add(axesHelper)
 
 function animate() {
 	requestAnimationFrame(animate);
