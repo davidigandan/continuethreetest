@@ -12,3 +12,18 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 const controls = new OrbitControls(camera, renderer.domElement)
+const material = new THREE.MeshBasicMaterial({ color: "orange" })
+const [testMeshes, cubeMesh, topTip] = makeSegment(20,4,Math.PI/4,Math.PI/4,material)
+
+
+const axesHelper = new THREE.AxesHelper(10)
+scene.add(testMeshes, cubeMesh, topTip, axesHelper)
+function animate() {
+	requestAnimationFrame(animate);
+	controls.update();
+	renderer.render( scene, camera );
+ }
+animate();
+
+// Mesh output disposal
+console.log('Current memory use:', renderer.info)

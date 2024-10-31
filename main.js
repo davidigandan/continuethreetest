@@ -102,10 +102,12 @@ function buildLine(lineWidth=5, lineColor="green", dataset=[[0,5], [1,30], [2,15
 const meshes = buildLine(1,"red", dataset)
 
 meshes.forEach((mesh,i) => {
-
     // mesh.geometry.rotateZ()
     scene.add(mesh);
 })
+
+
+const axesHelper = new THREE.AxesHelper(10)
 
 function animate() {
 	requestAnimationFrame(animate);

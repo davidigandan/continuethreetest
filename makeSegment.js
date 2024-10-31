@@ -2,11 +2,13 @@ import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
 
 
-export default function makeSegment(length=20, width=5, topAngle, bottomAngle, material = undefined) {
+export default function makeSegment(length=20, width=5.00, topAngle, bottomAngle, material = undefined) {
 
 const radius = width/2
-const topExcess = radius*Math.tan(topAngle);
-const bottomExcess = radius*Math.tan(bottomAngle);
+const topExcess = Math.abs(radius*Math.tan(topAngle));
+const bottomExcess = Math.abs(radius*Math.tan(bottomAngle));
+
+console.log(`topAngle is: ${topAngle*Math.PI}, topExcess is: ${topExcess}. bottomExcess is ${bottomExcess}.`)
 
 // Generate cylinder body
 const precutLength = topExcess + bottomExcess + length
@@ -50,6 +52,12 @@ const bottomToOrigin = (precutLength/2) - bottomExcess
 slicedCylinder.geometry.translate(0,bottomToOrigin,0)
 slicedCylinder.material = material;
 
+// // Extra items helpful for debugging
+// topCube.geometry.translate(10,0,0)
+// topCube.material = material
+// topTip.geometry.translate(20,0,0)
+// topTip.material = material
+
 // Disposal
 cylinder.geometry.dispose();
 topCube.geometry.dispose();
@@ -59,6 +67,11 @@ bottomTip.geometry.dispose();
 slicedCylinderTemp.geometry.dispose();
 
 // console.log('makeSegment memory use: ', renderer.info.memory);
-return slicedCylinder
+return [
+    slicedCylinder, 
+    // Extra items helpful for debugging
+    // topCube, 
+    // topTip
+]
 }
 
