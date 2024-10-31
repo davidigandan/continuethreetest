@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { CSG } from 'three-csg-ts';
 
 
-export default function makeSegment(length=20, width=5, topAngle, bottomAngle, material = new THREE.MeshBasicMaterial( { color: "green" } )) {
+export default function makeSegment(length=20, width=5, topAngle, bottomAngle, material = undefined) {
 
 const radius = width/2
 const topExcess = radius*Math.tan(topAngle);
@@ -28,7 +28,7 @@ topCube.geometry.translate(0,topShift,0)
 
 // Top subtraction
 const topTip = CSG.intersect(cylinder, topCube);
-let slicedCylinder = CSG.subtract(cylinder, topTip);
+const slicedCylinderTemp = CSG.subtract(cylinder, topTip);
 
 // Generate bottom cube
 const bottomCubeWidth = (width/Math.cos(bottomAngle))
@@ -42,8 +42,8 @@ const bottomShift = (length + topExcess - bottomExcess) /2
 bottomCube.geometry.translate(0, -bottomShift, 0)
 
 // Bottom subtraction
-const bottomTip = CSG.intersect(slicedCylinder, bottomCube);
-slicedCylinder = CSG.subtract(slicedCylinder, bottomTip);
+const bottomTip = CSG.intersect(slicedCylinderTemp, bottomCube);
+const slicedCylinder = CSG.subtract(slicedCylinderTemp, bottomTip);
 
 // Move bottom to world origin
 const bottomToOrigin = (precutLength/2) - bottomExcess
@@ -51,11 +51,12 @@ slicedCylinder.geometry.translate(0,bottomToOrigin,0)
 slicedCylinder.material = material;
 
 // Disposal
-// cylinder.geometry.dispose();
-// topCube.geometry.dispose();
-// bottomCube.geometry.dispose();
-// topTip.geometry.dispose();
-// bottomTip.geometry.dispose();
+cylinder.geometry.dispose();
+topCube.geometry.dispose();
+bottomCube.geometry.dispose();
+topTip.geometry.dispose();
+bottomTip.geometry.dispose();
+slicedCylinderTemp.geometry.dispose();
 
 // console.log('makeSegment memory use: ', renderer.info.memory);
 return slicedCylinder

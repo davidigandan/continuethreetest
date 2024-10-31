@@ -1,8 +1,18 @@
 import * as THREE from 'three';
 import  makeSegment  from './makeSegment'
 
-// returns an array of meshes incorrecly positioned
+// returns an array of meshes correctly positioned
+/*
+- bottomAngle is initialised as 0. Outside the for loop.
+- loop through dataset elemets
+- get our angle from pointA of segment1
+- get length of segment1 with Math.hypot
+- get next segments angle
+- work out turning angle and therefore work out cutting angle for curr and subsequent bottom angle
+-
 
+
+*/
 export default function buildSegments(lineWidth=5, lineColor="green", dataset=[(0,1), (1,2), (2,3), (3,4)]) {
     const meshesOfLine=[]
     const material = new THREE.MeshBasicMaterial( { color: lineColor } )
@@ -22,6 +32,8 @@ export default function buildSegments(lineWidth=5, lineColor="green", dataset=[(
             // change between points dp[current] and dp[curr+1]
             const deltaXTo1 = dataset[i][0] - dataset[i+1][0]
             const deltaYTo1 = dataset[i][1] - dataset[i+1][1]
+
+            let data = Math.hy
 
             // calculate length to next datapoint
             let currentSegmentLength;
