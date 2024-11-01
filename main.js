@@ -1,7 +1,8 @@
+const toDegrees = 180/Math.PI;
+
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import  makeSegment  from './makeSegment'
-import { color } from 'three/webgpu';
+import  makeSegment  from './makeSegment' 
 
 // Setup scene, camera, renderer
 const scene = new THREE.Scene();
@@ -68,8 +69,13 @@ function buildLine(lineWidth=5, lineColor="green", dataset=[[0,0], [40,40], [80,
         // console.log(`Current segment length is ${currentSegmentLength}`)
 
         // calculate angle of current segment
-        // const currentSegmentAngle =  Math.atan(deltaXTo1/deltaYTo1) //the breaking change
-        const currentSegmentAngle = Math.asin(deltaXTo1/currentSegmentLength)
+        let currentSegmentAngle;
+        if ((deltaYTo1/deltaXTo1)>0) {
+            currentSegmentAngle = Math.asin(deltaXTo1/currentSegmentLength)
+        } else {
+            currentSegmentAngle = Math.PI - Math.asin(deltaXTo1/currentSegmentLength)
+        }
+
 
         let topCutAngle;
         let bottomCutAngle;
