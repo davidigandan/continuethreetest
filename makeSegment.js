@@ -24,7 +24,7 @@ const topCube = new THREE.Mesh( topCubeGeometry);
 
 // Position topCube
 topCube.geometry.translate(0,topCubeWidth/2,0)
-topCube.geometry.rotateZ(topAngle); //rotate topCube 
+topCube.geometry.rotateZ(-topAngle); //rotate topCube 
 const topShift = (length+bottomExcess-topExcess) /2
 topCube.geometry.translate(0,topShift,0) 
 

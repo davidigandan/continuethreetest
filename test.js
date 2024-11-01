@@ -13,11 +13,11 @@ document.body.appendChild( renderer.domElement );
 
 const controls = new OrbitControls(camera, renderer.domElement)
 const material = new THREE.MeshBasicMaterial({ color: "orange" })
-const [testMeshes, cubeMesh, topTip] = makeSegment(20,4,Math.PI/4,Math.PI/4,material)
+const testMeshes = makeSegment(20,4,Math.PI/4,Math.PI/4,material)
 
 
 const axesHelper = new THREE.AxesHelper(10)
-scene.add(testMeshes, cubeMesh, topTip, axesHelper)
+scene.add(testMeshes, axesHelper)
 function animate() {
 	requestAnimationFrame(animate);
 	controls.update();
