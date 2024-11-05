@@ -14,11 +14,7 @@ export default function makeMitreSegment(
 
   const topExcess = radius * Math.min(maxExcess, Math.abs(Math.tan(topAngle)));
 
-  const bottomExcess =
-    radius * Math.min(maxExcess, Math.abs(Math.tan(bottomAngle)));
-
-  // Helpful for debugging
-  // console.log(`topAngle is: ${topAngle*Math.PI}, topExcess is: ${topExcess}. bottomExcess is ${bottomExcess}.`)
+  const bottomExcess = radius * Math.min(maxExcess, Math.abs(Math.tan(bottomAngle)));
 
   // Generate cylinder body
   const precutLength = topExcess + bottomExcess + length;
@@ -73,12 +69,6 @@ export default function makeMitreSegment(
   slicedCylinder.geometry.translate(0, bottomToOrigin, 0);
   slicedCylinder.material = material;
 
-  // // Extra items helpful for debugging
-  // topCube.geometry.translate(10,0,0)
-  // topCube.material = material
-  // topTip.geometry.translate(20,0,0)
-  // topTip.material = material
-
   // Disposal
   cylinder.geometry.dispose();
   topCube.geometry.dispose();
@@ -87,9 +77,6 @@ export default function makeMitreSegment(
   bottomTip.geometry.dispose();
   slicedCylinderTemp.geometry.dispose();
 
-  // console.log('makeSegment memory use: ', renderer.info.memory);
+  
   return slicedCylinder;
-  // Extra items helpful for debugging (return an array for extra items)
-  // topCube,
-  // topTip
 }

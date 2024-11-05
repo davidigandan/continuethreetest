@@ -60,16 +60,7 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
     const relativeAngle = nextSegmentAngle - currentSegmentAngle;
 
     const topCutAngle = relativeAngle / 2;
-    // console.log(
-    //     `From segment ${i}
-    //     Current deltaX1To2 should be 40. It is: ${deltaX1To2}. \n
-    //     Current deltaY1To2 should be 40. It is: ${deltaY1To2} (alternating). The sum is ${y2} -${y1}\n
-    //     Computing nextSegmentAngle: 180 - ${Math.abs(Math.atan2(deltaY1To2,deltaX1To2))} \n
-    //     Current nextSegmentAngle should be 135. It is: ${nextSegmentAngle*(180/Math.PI)}. \n
-    //     Relative angles should be 90. They are ${relativeAngle*(180/Math.PI)}\n
-    //     So topCutAngle is ${topCutAngle*toDegrees}
-    //     `
-    // )
+
     return topCutAngle;
   }
 
@@ -98,22 +89,16 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
     let topCutAngle;
 
     if (i < dataset.length - 2) {
-      // console.log(`Current positionX is: ${dataset[i][0]}, Current postionY is: ${dataset[i][1]}`)
-      // console.log(`Initial bottomCutHelper ${bottomCutHelper}`)
-      // console.log(dataset[i+1], dataset[i+2], currentSegmentAngle*(180/Math.PI))
+      
       topCutAngle = getTopCut(
         dataset[i + 1],
         dataset[i + 2],
         currentSegmentAngle,
         i
       );
-      // console.log(`for segment${i} bottomCutAngle: ${bottomCutAngle*toDegrees}, topCutAngle: ${topCutAngle*toDegrees}`)
-      // console.log(`After update bottomCutHelper${bottomCutHelper}, topCutAngle ${topCutAngle}` )
+      
     } else {
-      // console.log(`Current positionX is: ${dataset[i][0]}, Current postionY is: ${dataset[i][1]}`)
-      // console.log(dataset[i+1], dataset[i+2], currentSegmentAngle*(180/Math.PI))
       topCutAngle = 0;
-      // console.log(`for segment${i} bottomCutAngle: ${bottomCutAngle*toDegrees}`)
     }
 
     const segment = makeMitreSegment(
@@ -124,7 +109,7 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
       material
     );
     bottomCutAngle = topCutAngle;
-    // console.log(`currentSegmentAngles is ${currentSegmentAngle*(180/Math.PI)}`);
+    
     segment.rotateZ(-currentSegmentAngle);
     segment.position.x = dataset[i][0];
     segment.position.y = dataset[i][1];
@@ -149,7 +134,6 @@ const colorWheel = [
 ];
 
 meshes.forEach((mesh, i) => {
-  // console.log(`Is it a mesh?: ${mesh instanceof THREE.Mesh}`);
   // mesh.material = new THREE.MeshBasicMaterial({ color: colorWheel[i] });
   scene.add(mesh);
 });
