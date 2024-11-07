@@ -3,7 +3,7 @@ const toDegrees = 180 / Math.PI;
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
-import makeMitreSegment from "./makeMitreSegment";
+import { makeMitreSegment, makeSegment } from "./makeSegment";
 import { sine, generateRandom } from "./analysis/generateData";
 
 // Create stats instance
@@ -39,7 +39,7 @@ const rightAngleDataset4 = [
   [80, -40],
   [120, -80],
 ];
-const randomDataset = generateRandom(0, 50, 1, 0, 50, 5);
+const randomDataset = generateRandom(0, 30, 1, 0, 50, 5);
 const sineDataset = sine(0, 2 * Math.PI, Math.PI / 4);
 
 function buildLine(dataset, lineWidth = 5, lineColor = "green") {
@@ -89,14 +89,12 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
     let topCutAngle;
 
     if (i < dataset.length - 2) {
-      
       topCutAngle = getTopCut(
         dataset[i + 1],
         dataset[i + 2],
         currentSegmentAngle,
         i
       );
-      
     } else {
       topCutAngle = 0;
     }
@@ -108,8 +106,11 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
       bottomCutAngle,
       material
     );
+
+    // const segment = makeSegment(currentSegmentLength, lineWidth, material)
+
     bottomCutAngle = topCutAngle;
-    
+
     segment.rotateZ(-currentSegmentAngle);
     segment.position.x = dataset[i][0];
     segment.position.y = dataset[i][1];

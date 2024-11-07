@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { CSG } from "three-csg-ts";
+import BevelledCylinderGeometry from './BevelledCylinderGeometry'
 
-export default function makeMitreSegment(
+export function makeMitreSegment(
   length = 20,
   width = 5.0,
   topAngle,
@@ -14,16 +15,12 @@ export default function makeMitreSegment(
 
   const topExcess = radius * Math.min(maxExcess, Math.abs(Math.tan(topAngle)));
 
-  const bottomExcess = radius * Math.min(maxExcess, Math.abs(Math.tan(bottomAngle)));
+  const bottomExcess =
+    radius * Math.min(maxExcess, Math.abs(Math.tan(bottomAngle)));
 
   // Generate cylinder body
   const precutLength = topExcess + bottomExcess + length;
-  const geometry = new THREE.CylinderGeometry(
-    radius,
-    radius,
-    precutLength,
-    36
-  );
+  const geometry = new THREE.CylinderGeometry(radius, radius, precutLength, 36);
   const cylinder = new THREE.Mesh(geometry);
 
   // Create topCube
@@ -77,6 +74,42 @@ export default function makeMitreSegment(
   bottomTip.geometry.dispose();
   slicedCylinderTemp.geometry.dispose();
 
-  
   return slicedCylinder;
+}
+
+export function makeSegment(length = 20, width = 5, material = undefined) {
+  const radius = width / 2;
+
+  // Generate cylinder body
+  const geometry = new THREE.CylinderGeometry(radius, radius, length, 36);
+
+  const cylinder = new THREE.Mesh(geometry);
+
+  // Move bottom to world origin
+  cylinder.geometry.translate(0, length / 2, 0);
+  cylinder.material = material;
+
+  return cylinder;
+}
+
+export function showBevelledCylinder(
+  length = 20,
+  width = 5.0,
+  topAngle,
+  bottomAngle,
+  material = undefined,
+  // mitreLimit = 5
+) {
+  const radius = width/2
+  
+  // Generate cylinder body
+  const geometry = new BevelledCylinderGeometry(radius, length, 32, 6, topAngle, bottomAngle)
+
+  const cylinder = new THREE.Mesh(geometry)
+
+  // Move bottom to world origin
+  cylinder.geometry.translate(0, length / 2, 0);
+  cylinder.material = material
+
+  return cylinder;
 }
