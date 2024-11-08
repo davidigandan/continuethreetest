@@ -46,6 +46,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
     const indexArray = [];
     const halfLength = length / 2;
     let groupStart = 0;
+    let torsoEndIndex;
 
     const halfTopCap = topCapLength / 2;
     const halfBottomCap = bottomCapLength / 2;
@@ -87,11 +88,11 @@ class BevelledCylinderGeometry extends BufferGeometry {
           vertex.z = radius * cosTheta;
           vertices.push(vertex.x, vertex.y, vertex.z);
 
-          // save the index of the verte just generated into indexRow
+          // save the index of the vertex just generated into indexRow
           indexRow.push(index++);
         }
-
         indexArray.push(indexRow);
+        torsoEndIndex = index; // only useful on final loop to get index of end of segment
       }
 
       // generate indices
@@ -120,6 +121,9 @@ class BevelledCylinderGeometry extends BufferGeometry {
       const vertex = new Vector3();
 
       // generate centre point (at datapoint)
+
+      const centreIndex = index;
+
       vertex.x = 0;
       vertex.y = halfTopCap + torsoLength + halfBottomCap; // keep bottom dP at world origin
       vertex.z = 0;
@@ -148,7 +152,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
           vertex.y = abs(vertex.x) * Math.tan(topAngle);
         }
 
-        vertex.y += torsoLength + halfBottomCap; // keep bottom dP at world origin
+        vertex.y += torsoLength + halfBottomCap; // keep bottom datapoint at world origin
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
@@ -158,7 +162,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
       // generate indices
 
       for (let x = 0; x <= radialSegments - 2; x++) {
-        indices.push(centerIndex, centerIndex + 1 + x, centerIndex + 2 + x);
+        indices.push(centreIndex, centreIndex + 1 + x, centreIndex + 2 + x);
       }
 
       //connect cap to torso
@@ -174,14 +178,58 @@ class BevelledCylinderGeometry extends BufferGeometry {
       const vertex = new Vector3();
 
       // generate centre point (at datapoint)
+
+      const centreIndex = index;
+
       vertex.x = 0;
       vertex.y = 0;
       vertex.z = 0;
       vertices.push(vertex.x, vertex.y, vertex.z);
 
-      index ++;
+      index++;
 
-      // generate radial bottom cap
+      // generate bottom radial cap
+
+      const radialBottomCapIndexStart = index;
+
+      for (let x = 0; x <= radialSegments; x++) {
+        const u = x / radialSegments;
+
+        const theta = u * 2 * Math.PI;
+
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+
+        // vertex
+
+        // origin is at bottom datapoint
+        vertex.x = radius * sinTheta;
+        if (vertex.x >= 0) {
+          vertex.y = -(abs(vertex.x) * Math.tan(topAngle)); // translate downwards
+        } else {
+          vertex.y = abs(vertex.x) * Math.tan(topAngle);
+        }
+        vertex.z = radius * cosTheta;
+        vertices.push(vertex.x, vertex.y, vertex.z);
+
+        index++;
+      }
+
+      // generate indices
+
+      for (let x = 0; x <= radialSegments - 2; x++) {
+        indices.push(centreIndex, centreIndex + 1 + x, centreIndex + 2 + x);
+      }
+
+      // connect cap to torso
+      const torsoBottomStartIndex = torsoEndIndex - radialSegments;
+      for (let x = 0; x < radialSegments; x++) {
+        indices.push(
+          torsoBottomStartIndex + x,
+          torsoBottomStartIndex + x + 1,
+          radialBottomCapIndexStart + x
+        );
+      }
     }
   }
 }
