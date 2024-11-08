@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-// import { showBevelledCylinder } from "./makeSegment";
+import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry.js"
 
 // Setup scene, camera, renderer
 const scene = new THREE.Scene();
@@ -19,15 +19,13 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 const material = new THREE.MeshBasicMaterial({ color: "orange" });
 // const bevelledCylinder = showBevelledCylinder()
-const testConeGeometry = new THREE.CylinderGeometry(
+const testConeGeometry = new BevelledCylinderGeometry(
+  5,
   20,
-  20,
-  20,
-  36,
-  1,
-  false,
-  0,
-  2 * Math.PI
+  8,
+  7,
+  Math.PI/4,
+  Math.PI/4,
 );
 const testConeMesh = new THREE.Mesh(
   testConeGeometry,

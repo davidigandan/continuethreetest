@@ -147,9 +147,9 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         vertex.x = radius * sinTheta;
         if (vertex.x <= 0) {
-          vertex.y = abs(vertex.x) * Math.tan(topAngle) + halfTopCap;
+          vertex.y = Math.abs(vertex.x) * Math.tan(topAngle) + halfTopCap;
         } else {
-          vertex.y = abs(vertex.x) * Math.tan(topAngle);
+          vertex.y = Math.abs(vertex.x) * Math.tan(topAngle);
         }
 
         vertex.y += torsoLength + halfBottomCap; // keep bottom datapoint at world origin
@@ -205,9 +205,9 @@ class BevelledCylinderGeometry extends BufferGeometry {
         // origin is at bottom datapoint
         vertex.x = radius * sinTheta;
         if (vertex.x >= 0) {
-          vertex.y = -(abs(vertex.x) * Math.tan(topAngle)); // translate downwards
+          vertex.y = -(Math.abs(vertex.x) * Math.tan(topAngle)); // translate downwards
         } else {
-          vertex.y = abs(vertex.x) * Math.tan(topAngle);
+          vertex.y = Math.abs(vertex.x) * Math.tan(topAngle);
         }
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
