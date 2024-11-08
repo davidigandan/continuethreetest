@@ -53,7 +53,8 @@ class BevelledCylinderGeometry extends BufferGeometry {
     // generate geometry
 
     generateTorso();
-    generateCaps();
+    generateTopCap(topAngle);
+    generateBottomCap(bottomAngle);
 
     // build geometry
     this.setIndex(indices);
@@ -113,11 +114,24 @@ class BevelledCylinderGeometry extends BufferGeometry {
       }
     }
 
-    function generateCaps() {
+    function generateTopCap(topAngle) {
       // generate topCap
-      const capIndexRow = [];
 
-      for (let x = 1; x <= radialSegments; x++) {
+      const vertex = new Vector3();
+
+      // generate centre point (at datapoint)
+      vertex.x = 0;
+      vertex.y = halfTopCap + torsoLength + halfBottomCap; // keep bottom dP at world origin
+      vertex.z = 0;
+      vertices.push(vertex.x, vertex.y, vertex.z);
+
+      index++;
+
+      //generate top radial cap
+
+      const radialTopCapIndexStart = index;
+
+      for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
 
         const theta = u * 2 * Math.PI;
@@ -128,10 +142,46 @@ class BevelledCylinderGeometry extends BufferGeometry {
         // vertex
 
         vertex.x = radius * sinTheta;
-        vertex.y = -v * length + 
-            torsoLength + halfBottomCap; // push up bottom datapoint to world origin
+        if (vertex.x <= 0) {
+          vertex.y = abs(vertex.x) * Math.tan(topAngle) + halfTopCap;
+        } else {
+          vertex.y = abs(vertex.x) * Math.tan(topAngle);
+        }
+
+        vertex.y += torsoLength + halfBottomCap; // keep bottom dP at world origin
         vertex.z = radius * cosTheta;
+        vertices.push(vertex.x, vertex.y, vertex.z);
+
+        index++;
       }
+
+      // generate indices
+
+      for (let x = 0; x <= radialSegments - 2; x++) {
+        indices.push(centerIndex, centerIndex + 1 + x, centerIndex + 2 + x);
+      }
+
+      //connect cap to torso
+
+      for (let x = 0; x < radialSegments; x++) {
+        indices.push(x, x + 1, radialTopCapIndexStart + x);
+      }
+    }
+
+    function generateBottomCap(bottomAngle) {
+      // generate bottomCap
+
+      const vertex = new Vector3();
+
+      // generate centre point (at datapoint)
+      vertex.x = 0;
+      vertex.y = 0;
+      vertex.z = 0;
+      vertices.push(vertex.x, vertex.y, vertex.z);
+
+      index ++;
+
+      // generate radial bottom cap
     }
   }
 }
