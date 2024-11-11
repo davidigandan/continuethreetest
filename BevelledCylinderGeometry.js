@@ -45,7 +45,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
     let groupStart = 0;
     let torsoEndIndex;
 
-
     // generate geometry
 
     generateTorso();
@@ -60,10 +59,17 @@ class BevelledCylinderGeometry extends BufferGeometry {
       const vertex = new Vector3();
 
       const tanTopAngle = Math.tan(topAngle);
-      let groupCount = 0;
+
+      let indexRow = [];
+      // generate cover
+      for (let x = 0; x <= radialSegments; x++) {
+        vertices.push(0, length, 0);
+        indexRow.push(index++);
+      }
+      indexArray.push(indexRow);
 
       // generate vertices
-      let indexRow = [];
+      indexRow = [];
 
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
@@ -73,10 +79,11 @@ class BevelledCylinderGeometry extends BufferGeometry {
         const sinTheta = Math.sin(theta);
         const cosTheta = Math.cos(theta);
 
+        // center vertex
+
         // vertex
 
         vertex.x = radius * sinTheta;
-        //   vertex.y = -v * length + torsoLength + halfBottomCap; // push up bottom datapoint to world origin
         vertex.y = length + vertex.x * tanTopAngle;
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
@@ -98,7 +105,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
         // vertex
 
         vertex.x = radius * sinTheta;
-        //   vertex.y = -v * length + torsoLength + halfBottomCap; // push up bottom datapoint to world origin
         vertex.y = midHeight;
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
@@ -109,6 +115,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
       indexArray.push(indexRow);
       indexRow = [];
       const tanBottomAngle = Math.tan(-bottomAngle);
+
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
 
@@ -117,10 +124,11 @@ class BevelledCylinderGeometry extends BufferGeometry {
         const sinTheta = Math.sin(theta);
         const cosTheta = Math.cos(theta);
 
+        // centre vertex
+
         // vertex
 
         vertex.x = radius * sinTheta;
-        //   vertex.y = -v * length + torsoLength + halfBottomCap; // push up bottom datapoint to world origin
         vertex.y = vertex.x * tanBottomAngle;
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
@@ -130,10 +138,18 @@ class BevelledCylinderGeometry extends BufferGeometry {
       }
       indexArray.push(indexRow);
 
+      indexRow = [];
+      // generate cover
+      for (let x = 0; x <= radialSegments; x++) {
+        vertices.push(0, 0, 0);
+        indexRow.push(index++);
+      }
+      indexArray.push(indexRow);
+
       // generate indices
 
       for (let x = 0; x < radialSegments; x++) {
-        for (let y = 0; y < 2; y++) {
+        for (let y = 0; y < 4; y++) {
           // assemble a square
 
           const a = indexArray[y][x];
@@ -143,128 +159,11 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
           // faces
           indices.push(a, b, d);
-          groupCount += 3;
           indices.push(b, c, d);
-          groupCount += 3;
         }
       }
-    }
 
-    function generateTopCap(topAngle) {
-      // generate topCap
-
-      const vertex = new Vector3();
-
-      // generate centre point (at datapoint)
-
-      const centreIndex = index;
-
-      vertex.x = 0;
-      vertex.y = halfTopCap + torsoLength + halfBottomCap; // keep bottom dP at world origin
-      vertex.z = 0;
-      vertices.push(vertex.x, vertex.y, vertex.z);
-
-      index++;
-
-      //generate top radial cap
-
-      const radialTopCapIndexStart = index;
-
-      for (let x = 0; x <= radialSegments; x++) {
-        const u = x / radialSegments;
-
-        const theta = u * 2 * Math.PI;
-
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
-
-        // vertex
-
-        vertex.x = radius * sinTheta;
-        if (vertex.x <= 0) {
-          vertex.y = Math.abs(vertex.x) * Math.tan(topAngle) + halfTopCap;
-        } else {
-          vertex.y = Math.abs(vertex.x) * Math.tan(topAngle);
-        }
-
-        vertex.y += torsoLength + halfBottomCap; // keep bottom datapoint at world origin
-        vertex.z = radius * cosTheta;
-        vertices.push(vertex.x, vertex.y, vertex.z);
-
-        index++;
-      }
-
-      // generate indices
-
-      for (let x = 0; x <= radialSegments - 2; x++) {
-        indices.push(centreIndex, centreIndex + 1 + x, centreIndex + 2 + x);
-      }
-
-      //connect cap to torso
-
-      for (let x = 0; x < radialSegments; x++) {
-        indices.push(x, x + 1, radialTopCapIndexStart + x);
-      }
-    }
-
-    function generateBottomCap(bottomAngle) {
-      // generate bottomCap
-
-      const vertex = new Vector3();
-
-      // generate centre point (at datapoint)
-
-      const centreIndex = index;
-
-      vertex.x = 0;
-      vertex.y = 0;
-      vertex.z = 0;
-      vertices.push(vertex.x, vertex.y, vertex.z);
-
-      index++;
-
-      // generate bottom radial cap
-
-      const radialBottomCapIndexStart = index;
-
-      for (let x = 0; x <= radialSegments; x++) {
-        const u = x / radialSegments;
-
-        const theta = u * 2 * Math.PI;
-
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
-
-        // vertex
-
-        // origin is at bottom datapoint
-        vertex.x = radius * sinTheta;
-        if (vertex.x >= 0) {
-          vertex.y = -(Math.abs(vertex.x) * Math.tan(topAngle)); // translate downwards
-        } else {
-          vertex.y = Math.abs(vertex.x) * Math.tan(topAngle);
-        }
-        vertex.z = radius * cosTheta;
-        vertices.push(vertex.x, vertex.y, vertex.z);
-
-        index++;
-      }
-
-      // generate indices
-
-      for (let x = 0; x <= radialSegments - 2; x++) {
-        indices.push(centreIndex, centreIndex + 1 + x, centreIndex + 2 + x);
-      }
-
-      // connect cap to torso
-      const torsoBottomStartIndex = torsoEndIndex - radialSegments;
-      for (let x = 0; x < radialSegments; x++) {
-        indices.push(
-          torsoBottomStartIndex + x,
-          torsoBottomStartIndex + x + 1,
-          radialBottomCapIndexStart + x
-        );
-      }
+      console.log(indexArray);
     }
   }
 }
