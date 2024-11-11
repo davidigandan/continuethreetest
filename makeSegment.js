@@ -108,7 +108,8 @@ export function makeMitreSegment2(
     radius,
     topAngle,
     bottomAngle,
-    radialSegments
+    radialSegments,
+    1
   );
   console.log(`Segment Geo: ${segmentGeometry}`);
 

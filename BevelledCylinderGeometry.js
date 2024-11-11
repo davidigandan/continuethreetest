@@ -12,11 +12,8 @@ class BevelledCylinderGeometry extends BufferGeometry {
     topAngle,
     bottomAngle,
     radialSegments = 32,
+    mitreLimit = 1
   ) {
-    // console.log(`Check: ${length},
-    //  Check: ${radius},
-    //  Check: ${topAngle}, 
-    //  Check: ${radialSegments} `)
     super();
 
     this.type = "BevelledCylinderGeometry";
@@ -32,10 +29,17 @@ class BevelledCylinderGeometry extends BufferGeometry {
     radialSegments = Math.floor(radialSegments);
 
     // top and bottom helpers
-    const topExcess = Math.abs(radius * Math.tan(topAngle));
-    const bottomExcess = Math.abs(radius * Math.tan(bottomAngle));
-    const midHeight = (length - topExcess + bottomExcess) / 2;
+    const maxExcess = mitreLimit * radius;
 
+    const topExcess = Math.abs(radius * Math.tan(topAngle));
+
+    const bottomExcess = Math.abs(radius * Math.tan(bottomAngle));
+
+    const midHeight = (length - topExcess + bottomExcess) / 2;
+    console.log(`maxExcess: ${maxExcess},
+      TopExcess ${topExcess},
+      BottomExcess ${bottomExcess},
+      `);
     // buffers
 
     const indices = [];
@@ -46,16 +50,14 @@ class BevelledCylinderGeometry extends BufferGeometry {
     let index = 0;
     const indexArray = [];
 
-
     // generate geometry
     generateTorso();
 
     // build geometry
     this.setIndex(indices);
-    this.setAttribute('position', new Float32BufferAttribute(vertices, 3));
+    this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
 
     function generateTorso() {
-      
       // generate cover
       let indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
@@ -63,8 +65,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
-      
-    
+
       // generate vertices
       const vertex = new Vector3();
       const tanTopAngle = Math.tan(topAngle);
@@ -78,7 +79,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         // vertex
         vertex.x = radius * sinTheta;
-        vertex.y = length + vertex.x * tanTopAngle;
+        vertex.y = length + Math.min(maxExcess * vertex.x, vertex.x * tanTopAngle);
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
@@ -86,7 +87,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
-      
+
       indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
@@ -115,7 +116,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         // vertex
         vertex.x = radius * sinTheta;
-        vertex.y = vertex.x * tanBottomAngle;
+        vertex.y = Math.max(maxExcess * vertex.x, vertex.x * tanBottomAngle);
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
@@ -124,7 +125,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
       }
       indexArray.push(indexRow);
 
-
       // generate bottom cover
       indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
@@ -132,7 +132,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
-
 
       // generate all indices
       for (let x = 0; x < radialSegments; x++) {
@@ -153,7 +152,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
       console.log(indexArray);
     }
 
-    console.log(vertices)
+    console.log(vertices);
   }
 }
 

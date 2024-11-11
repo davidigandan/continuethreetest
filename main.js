@@ -35,16 +35,21 @@ stats.init(renderer);
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-const rightAngleDataset4 = [
+const customDataset = [
   [0, 0],
+  [10, 10],
+  [15, 5],
   [40, 40],
-  [80, 0],
-  [120, 40],
+
+  // [0, 0],
+  // [40, 40],
+  // [80, 0],
+  // [120, 40],
 ];
 const randomDataset = generateRandom(0, 300, 1, 0, 50, 5);
 const sineDataset = sine(0, 2 * Math.PI, Math.PI / 4);
 
-function buildLine(dataset, lineWidth = 5, lineColor = "green") {
+function buildLine(dataset, lineWidth = 5, lineColor) {
   const meshesOfLine = [];
   const material = new THREE.MeshBasicMaterial({ color: lineColor });
 
@@ -125,17 +130,8 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
 }
 
 let timeTaken = -performance.now();
-const meshes = buildLine(randomDataset, 1, "blue");
-const colorWheel = [
-  "red",
-  "orange",
-  "yellow",
-  "green",
-  "blue",
-  "purple",
-  "black",
-  "pink",
-];
+const meshes = buildLine(randomDataset, 1, "purple");
+
 
 meshes.forEach((mesh, i) => {
   // mesh.material = new THREE.MeshBasicMaterial({ color: colorWheel[i] });
@@ -149,6 +145,8 @@ controls.update();
 // renderer.render(scene, camera)
 timeTaken += performance.now();
 console.log(timeTaken / 1000);
+
+
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
