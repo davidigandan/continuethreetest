@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { CSG } from "three-csg-ts";
-import BevelledCylinderGeometry from './BevelledCylinderGeometry'
+import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry";
 
-export function makeMitreSegment(
+// export function makeMitreSegment(
   length = 20,
   width = 5.0,
   topAngle,
@@ -75,41 +75,46 @@ export function makeMitreSegment(
   slicedCylinderTemp.geometry.dispose();
 
   return slicedCylinder;
-}
+// }
 
-export function makeSegment(length = 20, width = 5, material = undefined) {
-  const radius = width / 2;
+// // export function makeSegment(length = 20, width = 5, material = undefined) {
+//   const radius = width / 2;
 
-  // Generate cylinder body
-  const geometry = new THREE.CylinderGeometry(radius, radius, length, 36);
+//   // Generate cylinder body
+//   const geometry = new THREE.CylinderGeometry(radius, radius, length, 36);
 
-  const cylinder = new THREE.Mesh(geometry);
+//   const cylinder = new THREE.Mesh(geometry);
 
-  // Move bottom to world origin
-  cylinder.geometry.translate(0, length / 2, 0);
-  cylinder.material = material;
+//   // Move bottom to world origin
+//   cylinder.geometry.translate(0, length / 2, 0);
+//   cylinder.material = material;
 
-  return cylinder;
-}
+//   return cylinder;
+// }
 
-export function showBevelledCylinder(
+export function makeMitreSegment2(
   length = 20,
   width = 5.0,
   topAngle,
   bottomAngle,
-  material = undefined,
+  // material = undefined
   // mitreLimit = 5
 ) {
-  const radius = width/2
-  
+  const radius = width / 2;
   // Generate cylinder body
-  const geometry = new BevelledCylinderGeometry(radius, length, 32, 6, topAngle, bottomAngle)
+  const segmentGeometry = new BevelledCylinderGeometry(
+    length,
+    radius,
+    topAngle,
+    bottomAngle,
+    32
+  );
 
-  const cylinder = new THREE.Mesh(geometry)
+  const mitreSegment = new THREE.Mesh(segmentGeometry);
 
   // Move bottom to world origin
-  cylinder.geometry.translate(0, length / 2, 0);
-  cylinder.material = material
+  mitreSegment.material = material;
 
-  return cylinder;
+  return mitreSegment;
+}
 }

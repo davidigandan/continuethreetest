@@ -3,7 +3,7 @@ const toDegrees = 180 / Math.PI;
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
-import { makeMitreSegment, makeSegment } from "./makeSegment";
+import { makeMitreSegment2, makeMitreSegment, makeSegment } from "./makeSegment";
 import { sine, generateRandom } from "./analysis/generateData";
 
 // Create stats instance
@@ -39,7 +39,7 @@ const rightAngleDataset4 = [
   [80, -40],
   [120, -80],
 ];
-const randomDataset = generateRandom(0, 30, 1, 0, 50, 5);
+const randomDataset = generateRandom(0, 10, 1, 0, 50, 5);
 const sineDataset = sine(0, 2 * Math.PI, Math.PI / 4);
 
 function buildLine(dataset, lineWidth = 5, lineColor = "green") {
@@ -99,13 +99,15 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
       topCutAngle = 0;
     }
 
-    const segment = makeMitreSegment(
-      currentSegmentLength,
-      lineWidth,
-      topCutAngle,
-      bottomCutAngle,
-      material
-    );
+    // const segment = makeMitreSegment(
+    //   currentSegmentLength,
+    //   lineWidth,
+    //   topCutAngle,
+    //   bottomCutAngle,
+    //   material
+    // );
+
+    const segment = makeMitreSegment2(length, lineWidth, topCutAngle, bottomCutAngle, material);
 
     // const segment = makeSegment(currentSegmentLength, lineWidth, material)
 
@@ -122,7 +124,7 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
 }
 
 let timeTaken = -performance.now();
-const meshes = buildLine(randomDataset, 1, "red");
+const meshes = buildLine(rightAngleDataset4, 1, "blue");
 const colorWheel = [
   "red",
   "orange",

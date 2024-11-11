@@ -7,11 +7,11 @@ import {
 
 class BevelledCylinderGeometry extends BufferGeometry {
   constructor(
-    radius = 5,
     length = 20,
-    radialSegments = 32,
+    radius = 5,
     topAngle,
-    bottomAngle
+    bottomAngle,
+    radialSegments = 32,
   ) {
     super();
 
@@ -41,49 +41,40 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
     let index = 0;
     const indexArray = [];
-    const halfLength = length / 2;
-    let groupStart = 0;
-    let torsoEndIndex;
+
 
     // generate geometry
-
     generateTorso();
-    // generateTopCap(topAngle);
-    // generateBottomCap(bottomAngle);
 
     // build geometry
     this.setIndex(indices);
-    this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
+    this.setAttribute('position', new Float32BufferAttribute(vertices, 3));
 
     function generateTorso() {
-      const vertex = new Vector3();
-
-      const tanTopAngle = Math.tan(topAngle);
-
-      let indexRow = [];
+      
       // generate cover
+      let indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
         vertices.push(0, length, 0);
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
-
+      
+    
       // generate vertices
-      indexRow = [];
+      const vertex = new Vector3();
+      const tanTopAngle = Math.tan(topAngle);
 
+      indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
-
         const theta = u * 2 * Math.PI;
-
         const sinTheta = Math.sin(theta);
         const cosTheta = Math.cos(theta);
 
-        // center vertex
-
         // vertex
-
         vertex.x = radius * sinTheta;
+        console.log(`vertex.x is: ${radialSegments}`)
         vertex.y = length + vertex.x * tanTopAngle;
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
@@ -92,18 +83,15 @@ class BevelledCylinderGeometry extends BufferGeometry {
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
+      
       indexRow = [];
-
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
-
         const theta = u * 2 * Math.PI;
-
         const sinTheta = Math.sin(theta);
         const cosTheta = Math.cos(theta);
 
         // vertex
-
         vertex.x = radius * sinTheta;
         vertex.y = midHeight;
         vertex.z = radius * cosTheta;
@@ -113,21 +101,16 @@ class BevelledCylinderGeometry extends BufferGeometry {
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
+
       indexRow = [];
       const tanBottomAngle = Math.tan(-bottomAngle);
-
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
-
         const theta = u * 2 * Math.PI;
-
         const sinTheta = Math.sin(theta);
         const cosTheta = Math.cos(theta);
 
-        // centre vertex
-
         // vertex
-
         vertex.x = radius * sinTheta;
         vertex.y = vertex.x * tanBottomAngle;
         vertex.z = radius * cosTheta;
@@ -138,16 +121,17 @@ class BevelledCylinderGeometry extends BufferGeometry {
       }
       indexArray.push(indexRow);
 
+
+      // generate bottom cover
       indexRow = [];
-      // generate cover
       for (let x = 0; x <= radialSegments; x++) {
         vertices.push(0, 0, 0);
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
 
-      // generate indices
 
+      // generate all indices
       for (let x = 0; x < radialSegments; x++) {
         for (let y = 0; y < 4; y++) {
           // assemble a square
@@ -165,6 +149,8 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
       console.log(indexArray);
     }
+
+    console.log(vertices)
   }
 }
 

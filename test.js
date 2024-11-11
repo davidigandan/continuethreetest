@@ -18,13 +18,13 @@ document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 const material = new THREE.MeshBasicMaterial({ color: "orange" });
-// const bevelledCylinder = showBevelledCylinder()
+
 const testConeGeometry = new BevelledCylinderGeometry(
   5,
   20,
   36,
   7,
-  Math.PI / 4,
+  Math.PI / 8,
   Math.PI / 4
 );
 const testConeMesh = new THREE.Mesh(
