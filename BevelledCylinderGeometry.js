@@ -10,7 +10,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
     radius = 5,
     length = 20,
     radialSegments = 32,
-    heightSegments = 3,
     topAngle,
     bottomAngle
   ) {
@@ -22,18 +21,16 @@ class BevelledCylinderGeometry extends BufferGeometry {
       radius: radius,
       length: length,
       radialSegments: radialSegments,
-      heightSegments: heightSegments,
     };
 
     const scope = this;
 
     radialSegments = Math.floor(radialSegments);
-    heightSegments = Math.floor(heightSegments);
 
     // top and bottom helpers
-    const topCapLength = 2 * radius * Math.tan(topAngle);
-    const bottomCapLength = 2 * radius * Math.tan(bottomAngle);
-    const torsoLength = length - topCapLength - bottomCapLength;
+    const topExcess = Math.abs(radius * Math.tan(topAngle));
+    const bottomExcess = Math.abs(radius * Math.tan(bottomAngle));
+    const midHeight = (length - topExcess + bottomExcess) / 2;
 
     // buffers
 
@@ -48,14 +45,12 @@ class BevelledCylinderGeometry extends BufferGeometry {
     let groupStart = 0;
     let torsoEndIndex;
 
-    const halfTopCap = topCapLength / 2;
-    const halfBottomCap = bottomCapLength / 2;
 
     // generate geometry
 
     generateTorso();
-    generateTopCap(topAngle);
-    generateBottomCap(bottomAngle);
+    // generateTopCap(topAngle);
+    // generateBottomCap(bottomAngle);
 
     // build geometry
     this.setIndex(indices);
@@ -64,41 +59,81 @@ class BevelledCylinderGeometry extends BufferGeometry {
     function generateTorso() {
       const vertex = new Vector3();
 
+      const tanTopAngle = Math.tan(topAngle);
       let groupCount = 0;
 
       // generate vertices
+      let indexRow = [];
 
-      for (let y = 0; y <= heightSegments; y++) {
-        const indexRow = [];
+      for (let x = 0; x <= radialSegments; x++) {
+        const u = x / radialSegments;
 
-        const v = y / heightSegments;
+        const theta = u * 2 * Math.PI;
 
-        for (let x = 0; x <= radialSegments; x++) {
-          const u = x / radialSegments;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
 
-          const theta = u * 2 * Math.PI;
+        // vertex
 
-          const sinTheta = Math.sin(theta);
-          const cosTheta = Math.cos(theta);
+        vertex.x = radius * sinTheta;
+        //   vertex.y = -v * length + torsoLength + halfBottomCap; // push up bottom datapoint to world origin
+        vertex.y = length + vertex.x * tanTopAngle;
+        vertex.z = radius * cosTheta;
+        vertices.push(vertex.x, vertex.y, vertex.z);
 
-          // vertex
-
-          vertex.x = radius * sinTheta;
-          vertex.y = -v * length + torsoLength + halfBottomCap; // push up bottom datapoint to world origin
-          vertex.z = radius * cosTheta;
-          vertices.push(vertex.x, vertex.y, vertex.z);
-
-          // save the index of the vertex just generated into indexRow
-          indexRow.push(index++);
-        }
-        indexArray.push(indexRow);
-        torsoEndIndex = index; // only useful on final loop to get index of end of segment
+        // save the index of the vertex just generated into indexRow
+        indexRow.push(index++);
       }
+      indexArray.push(indexRow);
+      indexRow = [];
+
+      for (let x = 0; x <= radialSegments; x++) {
+        const u = x / radialSegments;
+
+        const theta = u * 2 * Math.PI;
+
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+
+        // vertex
+
+        vertex.x = radius * sinTheta;
+        //   vertex.y = -v * length + torsoLength + halfBottomCap; // push up bottom datapoint to world origin
+        vertex.y = midHeight;
+        vertex.z = radius * cosTheta;
+        vertices.push(vertex.x, vertex.y, vertex.z);
+
+        // save the index of the vertex just generated into indexRow
+        indexRow.push(index++);
+      }
+      indexArray.push(indexRow);
+      indexRow = [];
+      const tanBottomAngle = Math.tan(-bottomAngle);
+      for (let x = 0; x <= radialSegments; x++) {
+        const u = x / radialSegments;
+
+        const theta = u * 2 * Math.PI;
+
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+
+        // vertex
+
+        vertex.x = radius * sinTheta;
+        //   vertex.y = -v * length + torsoLength + halfBottomCap; // push up bottom datapoint to world origin
+        vertex.y = vertex.x * tanBottomAngle;
+        vertex.z = radius * cosTheta;
+        vertices.push(vertex.x, vertex.y, vertex.z);
+
+        // save the index of the vertex just generated into indexRow
+        indexRow.push(index++);
+      }
+      indexArray.push(indexRow);
 
       // generate indices
 
       for (let x = 0; x < radialSegments; x++) {
-        for (let y = 0; y < heightSegments; y++) {
+        for (let y = 0; y < 2; y++) {
           // assemble a square
 
           const a = indexArray[y][x];
