@@ -20,12 +20,11 @@ const controls = new OrbitControls(camera, renderer.domElement);
 const material = new THREE.MeshBasicMaterial({ color: "orange" });
 
 const testConeGeometry = new BevelledCylinderGeometry(
+  50,
   5,
-  20,
-  36,
-  7,
-  Math.PI / 8,
-  Math.PI / 4
+  Math.PI/4,
+  Math.PI/8,
+  32,
 );
 const testConeMesh = new THREE.Mesh(
   testConeGeometry,

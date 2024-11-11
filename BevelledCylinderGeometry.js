@@ -13,6 +13,10 @@ class BevelledCylinderGeometry extends BufferGeometry {
     bottomAngle,
     radialSegments = 32,
   ) {
+    // console.log(`Check: ${length},
+    //  Check: ${radius},
+    //  Check: ${topAngle}, 
+    //  Check: ${radialSegments} `)
     super();
 
     this.type = "BevelledCylinderGeometry";
@@ -74,7 +78,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         // vertex
         vertex.x = radius * sinTheta;
-        console.log(`vertex.x is: ${radialSegments}`)
         vertex.y = length + vertex.x * tanTopAngle;
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);

@@ -3,7 +3,9 @@ const toDegrees = 180 / Math.PI;
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
-import { makeMitreSegment2, makeMitreSegment, makeSegment } from "./makeSegment";
+import {
+  makeMitreSegment2,
+} from "./makeSegment";
 import { sine, generateRandom } from "./analysis/generateData";
 
 // Create stats instance
@@ -99,15 +101,13 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
       topCutAngle = 0;
     }
 
-    // const segment = makeMitreSegment(
-    //   currentSegmentLength,
-    //   lineWidth,
-    //   topCutAngle,
-    //   bottomCutAngle,
-    //   material
-    // );
-
-    const segment = makeMitreSegment2(length, lineWidth, topCutAngle, bottomCutAngle, material);
+    const segment = makeMitreSegment2(
+      currentSegmentLength,
+      lineWidth,
+      topCutAngle,
+      bottomCutAngle,
+      material
+    );
 
     // const segment = makeSegment(currentSegmentLength, lineWidth, material)
 
