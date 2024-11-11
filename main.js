@@ -37,11 +37,11 @@ stats.init(renderer);
 const controls = new OrbitControls(camera, renderer.domElement);
 const rightAngleDataset4 = [
   [0, 0],
-  [40, -40],
-  [80, -40],
-  [120, -80],
+  [40, 40],
+  [80, 0],
+  [120, 40],
 ];
-const randomDataset = generateRandom(0, 10, 1, 0, 50, 5);
+const randomDataset = generateRandom(0, 300, 1, 0, 50, 5);
 const sineDataset = sine(0, 2 * Math.PI, Math.PI / 4);
 
 function buildLine(dataset, lineWidth = 5, lineColor = "green") {
@@ -100,12 +100,13 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
     } else {
       topCutAngle = 0;
     }
+    console.log(`Topcut angle ${topCutAngle*toDegrees}, Bottomcut angle ${bottomCutAngle*toDegrees}`)
 
     const segment = makeMitreSegment2(
       currentSegmentLength,
       lineWidth,
-      topCutAngle,
-      bottomCutAngle,
+      -topCutAngle,
+      -bottomCutAngle,
       material
     );
 
@@ -124,7 +125,7 @@ function buildLine(dataset, lineWidth = 5, lineColor = "green") {
 }
 
 let timeTaken = -performance.now();
-const meshes = buildLine(rightAngleDataset4, 1, "blue");
+const meshes = buildLine(randomDataset, 1, "blue");
 const colorWheel = [
   "red",
   "orange",
