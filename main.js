@@ -3,9 +3,7 @@ const toDegrees = 180 / Math.PI;
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
-import {
-  makeMitreSegment2,
-} from "./makeSegment";
+import { makeMitreSegment, makeMitreSegment2 } from "./makeSegment";
 import { sine, generateRandom } from "./analysis/generateData";
 
 // Create stats instance
@@ -36,20 +34,20 @@ stats.init(renderer);
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 const customDataset = [
-  [0, 0],
-  [10, 10],
-  [15, 5],
-  [40, 40],
-
   // [0, 0],
+  // [10, 10],
+  // [15, 5],
   // [40, 40],
-  // [80, 0],
-  // [120, 40],
+
+  [0, 0],
+  [40, 40],
+  [80, 0],
+  [120, 40],
 ];
-const randomDataset = generateRandom(0, 300, 1, 0, 50, 5);
+const randomDataset = generateRandom(0, 100, 1, 0, 50, 5);
 const sineDataset = sine(0, 2 * Math.PI, Math.PI / 4);
 
-function buildLine(dataset, lineWidth = 5, lineColor) {
+function buildLine(dataset, lineWidth, lineColor) {
   const meshesOfLine = [];
   const material = new THREE.MeshBasicMaterial({ color: lineColor });
 
@@ -105,18 +103,30 @@ function buildLine(dataset, lineWidth = 5, lineColor) {
     } else {
       topCutAngle = 0;
     }
-    console.log(`Topcut angle ${topCutAngle*toDegrees}, Bottomcut angle ${bottomCutAngle*toDegrees}`)
+    // console.log(
+    //   `top angle ${topCutAngle * toDegrees}, Bottomcut angle ${
+    //     bottomCutAngle * toDegrees
+    //   }`
+    // );
 
     const segment = makeMitreSegment2(
       currentSegmentLength,
       lineWidth,
-      -topCutAngle,
-      -bottomCutAngle,
+      topCutAngle,
+      bottomCutAngle,
       material
     );
 
     // const segment = makeSegment(currentSegmentLength, lineWidth, material)
 
+    // const segment = makeMitreSegment(
+    //   currentSegmentLength,
+    //   lineWidth,
+    //   topCutAngle,
+    //   bottomCutAngle,
+    //   material
+    // );
+    
     bottomCutAngle = topCutAngle;
 
     segment.rotateZ(-currentSegmentAngle);
@@ -132,7 +142,6 @@ function buildLine(dataset, lineWidth = 5, lineColor) {
 let timeTaken = -performance.now();
 const meshes = buildLine(randomDataset, 1, "purple");
 
-
 meshes.forEach((mesh, i) => {
   // mesh.material = new THREE.MeshBasicMaterial({ color: colorWheel[i] });
   scene.add(mesh);
@@ -145,7 +154,6 @@ controls.update();
 // renderer.render(scene, camera)
 timeTaken += performance.now();
 console.log(timeTaken / 1000);
-
 
 function animate() {
   requestAnimationFrame(animate);

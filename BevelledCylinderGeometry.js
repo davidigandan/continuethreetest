@@ -1,3 +1,5 @@
+const toDegrees = 180 / Math.PI;
+
 import {
   BufferGeometry,
   Float32BufferAttribute,
@@ -7,12 +9,12 @@ import {
 
 class BevelledCylinderGeometry extends BufferGeometry {
   constructor(
-    length = 20,
-    radius = 5,
+    length,
+    radius,
     topAngle,
     bottomAngle,
-    radialSegments = 32,
-    mitreLimit = 1
+    radialSegments,
+    mitreLimit,
   ) {
     super();
 
@@ -31,15 +33,13 @@ class BevelledCylinderGeometry extends BufferGeometry {
     // top and bottom helpers
     const maxExcess = mitreLimit * radius;
 
-    const topExcess = Math.abs(radius * Math.tan(topAngle));
+    const topExcess =  radius * Math.tan(topAngle);
 
-    const bottomExcess = Math.abs(radius * Math.tan(bottomAngle));
+    const bottomExcess = radius * Math.tan(bottomAngle);
 
     const midHeight = (length - topExcess + bottomExcess) / 2;
-    console.log(`maxExcess: ${maxExcess},
-      TopExcess ${topExcess},
-      BottomExcess ${bottomExcess},
-      `);
+    
+
     // buffers
 
     const indices = [];
@@ -68,7 +68,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
       // generate vertices
       const vertex = new Vector3();
-      const tanTopAngle = Math.tan(topAngle);
+      const tanTopAngle = Math.tan(-topAngle);
 
       indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
@@ -79,7 +79,9 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         // vertex
         vertex.x = radius * sinTheta;
-        vertex.y = length + Math.min(maxExcess * vertex.x, vertex.x * tanTopAngle);
+        vertex.y = length + vertex.x * tanTopAngle;
+        // vertex.y =
+        //   length + Math.min(maxExcess * vertex.x, vertex.x * tanTopAngle);
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
@@ -107,7 +109,9 @@ class BevelledCylinderGeometry extends BufferGeometry {
       indexArray.push(indexRow);
 
       indexRow = [];
-      const tanBottomAngle = Math.tan(-bottomAngle);
+      const tanBottomAngle = Math.tan(bottomAngle);
+      console.log(`Line113: bottomAngle ${bottomAngle*toDegrees}`)
+
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
         const theta = u * 2 * Math.PI;
@@ -116,7 +120,8 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         // vertex
         vertex.x = radius * sinTheta;
-        vertex.y = Math.max(maxExcess * vertex.x, vertex.x * tanBottomAngle);
+        vertex.y = vertex.x * tanBottomAngle
+        // vertex.y = Math.max(maxExcess * vertex.x, vertex.x * tanBottomAngle);
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
