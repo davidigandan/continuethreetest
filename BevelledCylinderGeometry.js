@@ -33,9 +33,9 @@ class BevelledCylinderGeometry extends BufferGeometry {
     // top and bottom helpers
     const maxExcess = mitreLimit * radius;
 
-    const topExcess =  radius * Math.tan(topAngle);
+    const topExcess =  Math.min(maxExcess,radius * Math.tan(topAngle));
 
-    const bottomExcess = radius * Math.tan(bottomAngle);
+    const bottomExcess = Math.max(-maxExcess, radius * Math.tan(bottomAngle));
 
     const midHeight = (length - topExcess + bottomExcess) / 2;
     
@@ -80,8 +80,10 @@ class BevelledCylinderGeometry extends BufferGeometry {
         // vertex
         vertex.x = radius * sinTheta;
         vertex.y = length + vertex.x * tanTopAngle;
-        // vertex.y =
-        //   length + Math.min(maxExcess * vertex.x, vertex.x * tanTopAngle);
+        if (vertex.y > length) {
+          vertex.y = Math.min(length + maxExcess, length + vertex.x * Math.tan(topAngle))
+        }
+        // vertex.y = length + Math.min(maxExcess,vertex.x * tanTopAngle);
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
@@ -110,7 +112,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
       indexRow = [];
       const tanBottomAngle = Math.tan(bottomAngle);
-      console.log(`Line113: bottomAngle ${bottomAngle*toDegrees}`)
+      
 
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
@@ -120,8 +122,12 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         // vertex
         vertex.x = radius * sinTheta;
-        vertex.y = vertex.x * tanBottomAngle
-        // vertex.y = Math.max(maxExcess * vertex.x, vertex.x * tanBottomAngle);
+        vertex.y = vertex.x * tanBottomAngle;
+          if (vertex.y<0) {
+            vertex.y = Math.max(-maxExcess, vertex.y)
+            console.log(`Maxexcess: ${maxExcess}`)
+          }
+        
         vertex.z = radius * cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
@@ -154,10 +160,10 @@ class BevelledCylinderGeometry extends BufferGeometry {
         }
       }
 
-      console.log(indexArray);
+      // console.log(indexArray);
     }
 
-    console.log(vertices);
+    // console.log(vertices);
   }
 }
 

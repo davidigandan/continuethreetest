@@ -5,6 +5,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
 import { makeMitreSegment, makeMitreSegment2 } from "./makeSegment";
 import { sine, generateRandom } from "./analysis/generateData";
+import { rand } from "three/webgpu";
 
 // Create stats instance
 const stats = new Stats({ trackGPU: true });
@@ -40,11 +41,12 @@ const customDataset = [
   // [40, 40],
 
   [0, 0],
-  [40, 40],
-  [80, 0],
-  [120, 40],
+  [-10, 40],
+  [-10, 5],
+  [-120, 0],
 ];
 const randomDataset = generateRandom(0, 100, 1, 0, 50, 5);
+
 const sineDataset = sine(0, 2 * Math.PI, Math.PI / 4);
 
 function buildLine(dataset, lineWidth, lineColor) {
@@ -103,11 +105,11 @@ function buildLine(dataset, lineWidth, lineColor) {
     } else {
       topCutAngle = 0;
     }
-    // console.log(
-    //   `top angle ${topCutAngle * toDegrees}, Bottomcut angle ${
-    //     bottomCutAngle * toDegrees
-    //   }`
-    // );
+    console.log(
+      `top angle ${topCutAngle * toDegrees}, Bottomcut angle ${
+        bottomCutAngle * toDegrees
+      }`
+    );
 
     const segment = makeMitreSegment2(
       currentSegmentLength,
@@ -117,16 +119,6 @@ function buildLine(dataset, lineWidth, lineColor) {
       material
     );
 
-    // const segment = makeSegment(currentSegmentLength, lineWidth, material)
-
-    // const segment = makeMitreSegment(
-    //   currentSegmentLength,
-    //   lineWidth,
-    //   topCutAngle,
-    //   bottomCutAngle,
-    //   material
-    // );
-    
     bottomCutAngle = topCutAngle;
 
     segment.rotateZ(-currentSegmentAngle);
@@ -140,7 +132,7 @@ function buildLine(dataset, lineWidth, lineColor) {
 }
 
 let timeTaken = -performance.now();
-const meshes = buildLine(randomDataset, 1, "purple");
+const meshes = buildLine(customDataset, 1, "purple");
 
 meshes.forEach((mesh, i) => {
   // mesh.material = new THREE.MeshBasicMaterial({ color: colorWheel[i] });
