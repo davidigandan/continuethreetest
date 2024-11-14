@@ -113,9 +113,9 @@ export function makeMitreSegment2(
     topAngle,
     bottomAngle,
     radialSegments,
-    2
+    1
   );
-  // console.log(`Segment Geo: ${segmentGeometry}`);
+  
 
   const mitreSegment = new THREE.Mesh(segmentGeometry);
 

@@ -14,7 +14,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
     topAngle,
     bottomAngle,
     radialSegments,
-    mitreLimit,
+    mitreLimit
   ) {
     super();
 
@@ -33,12 +33,11 @@ class BevelledCylinderGeometry extends BufferGeometry {
     // top and bottom helpers
     const maxExcess = mitreLimit * radius;
 
-    const topExcess =  Math.min(maxExcess,radius * Math.tan(topAngle));
+    const topExcess = Math.min(maxExcess, radius * Math.tan(topAngle));
 
     const bottomExcess = Math.max(-maxExcess, radius * Math.tan(bottomAngle));
 
     const midHeight = (length - topExcess + bottomExcess) / 2;
-    
 
     // buffers
 
@@ -71,6 +70,8 @@ class BevelledCylinderGeometry extends BufferGeometry {
       const tanTopAngle = Math.tan(-topAngle);
 
       indexRow = [];
+      let firstLimitVertIndex = null;
+      let lastLimitVertIndex = null;
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
         const theta = u * 2 * Math.PI;
@@ -81,16 +82,35 @@ class BevelledCylinderGeometry extends BufferGeometry {
         vertex.x = radius * sinTheta;
         vertex.y = length + vertex.x * tanTopAngle;
         if (vertex.y > length) {
-          vertex.y = Math.min(length + maxExcess, length + vertex.x * Math.tan(topAngle))
+          vertex.y = Math.min(
+            length + maxExcess,
+            length + vertex.x * tanTopAngle
+          );
+
+          if ((vertex.y = length + maxExcess)) {
+            // if vertex is height limited, get index of 1st and last occurence.
+            if (firstLimitVertIndex === null) {
+              firstLimitVertIndex = index;
+            }
+            lastLimitVertIndex = index;
+          }
         }
-        // vertex.y = length + Math.min(maxExcess,vertex.x * tanTopAngle);
-        vertex.z = radius * cosTheta;
+        vertex.z = radius * -cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
         // save the index of the vertex just generated into indexRow
         indexRow.push(index++);
       }
+
+      console.log(`first: ${firstLimitVertIndex}, last: ${lastLimitVertIndex}`);
       indexArray.push(indexRow);
+      // compensate for mitreLimit angle drift
+      console.log(`vertices are: ${vertices}`)
+      if (firstLimitVertIndex) {
+        console.log(`occurs at ${length + maxExcess}`);
+        console.log(`last occurs at ${vertices[(lastLimitVertIndex*3)+1]}`);
+      }
+
 
       indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
@@ -102,7 +122,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
         // vertex
         vertex.x = radius * sinTheta;
         vertex.y = midHeight;
-        vertex.z = radius * cosTheta;
+        vertex.z = radius * -cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
         // save the index of the vertex just generated into indexRow
@@ -112,7 +132,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
       indexRow = [];
       const tanBottomAngle = Math.tan(bottomAngle);
-      
 
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
@@ -123,12 +142,12 @@ class BevelledCylinderGeometry extends BufferGeometry {
         // vertex
         vertex.x = radius * sinTheta;
         vertex.y = vertex.x * tanBottomAngle;
-          if (vertex.y<0) {
-            vertex.y = Math.max(-maxExcess, vertex.y)
-            console.log(`Maxexcess: ${maxExcess}`)
-          }
-        
-        vertex.z = radius * cosTheta;
+        if (vertex.y < 0) {
+          vertex.y = Math.max(-maxExcess, vertex.y);
+          console.log(`Maxexcess: ${maxExcess}`);
+        }
+
+        vertex.z = radius * -cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
         // save the index of the vertex just generated into indexRow

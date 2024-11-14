@@ -3,7 +3,7 @@ const toDegrees = 180 / Math.PI;
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
-import { makeMitreSegment, makeMitreSegment2 } from "./makeSegment";
+import { makeSegment, makeMitreSegment, makeMitreSegment2 } from "./makeSegment";
 import { sine, generateRandom } from "./analysis/generateData";
 import { rand } from "three/webgpu";
 
@@ -43,7 +43,7 @@ const customDataset = [
   [0, 0],
   [-10, 40],
   [-10, 5],
-  [-120, 0],
+  // [-120, 0],
 ];
 const randomDataset = generateRandom(0, 100, 1, 0, 50, 5);
 
@@ -118,6 +118,8 @@ function buildLine(dataset, lineWidth, lineColor) {
       bottomCutAngle,
       material
     );
+
+    
 
     bottomCutAngle = topCutAngle;
 
