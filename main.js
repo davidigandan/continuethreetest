@@ -3,7 +3,11 @@ const toDegrees = 180 / Math.PI;
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
-import { makeSegment, makeMitreSegment, makeMitreSegment2 } from "./makeSegment";
+import {
+  makeSegment,
+  makeMitreSegment,
+  makeMitreSegment2,
+} from "./makeSegment";
 import { sine, generateRandom } from "./analysis/generateData";
 import { rand } from "three/webgpu";
 
@@ -56,7 +60,7 @@ function buildLine(dataset, lineWidth, lineColor) {
   let startBottomAngle = 0;
   let endTopAngle = 0;
 
-  function getTopCut([x1, y1], [x2, y2], currentSegmentAngle, i) {
+  function getTopCut([x1, y1], [x2, y2], currentSegmentAngle) {
     // NEXT SEGMENT CALCULATIONS
     // change between points dp[current+1] and dp[current+2]
     const deltaX1To2 = x2 - x1;
@@ -64,8 +68,12 @@ function buildLine(dataset, lineWidth, lineColor) {
 
     const nextSegmentAngle = Math.atan2(deltaX1To2, deltaY1To2);
 
-    const relativeAngle = nextSegmentAngle - currentSegmentAngle;
+    let relativeAngle = nextSegmentAngle - currentSegmentAngle;
 
+    // Normalise angles greater than PI to their negative equivalents
+    if (relativeAngle >= Math.PI) {
+      relativeAngle = relativeAngle - 2 * Math.PI;
+    }
     const topCutAngle = relativeAngle / 2;
 
     return topCutAngle;
@@ -118,8 +126,6 @@ function buildLine(dataset, lineWidth, lineColor) {
       bottomCutAngle,
       material
     );
-
-    
 
     bottomCutAngle = topCutAngle;
 

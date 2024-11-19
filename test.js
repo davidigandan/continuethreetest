@@ -1,3 +1,5 @@
+const toDegrees = 180 / Math.PI;
+
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry.js";
@@ -13,34 +15,34 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 camera.position.z = 60;
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({antialias: "true"});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 const material = new THREE.MeshBasicMaterial({ color: "orange" });
 
-// const testConeGeometry = new BevelledCylinderGeometry(
-//   20,
-//   5,
-//   Math.PI/4,
-//   Math.PI/4,
-//   32,
-//   1,
-// );
-
-// const testConeMesh = new THREE.Mesh(
-//   testConeGeometry,
-//   new THREE.MeshBasicMaterial({ color: "blue" })
-// );
-
-const testConeMesh = makeMitreSegment2(
+const testConeGeometry = new BevelledCylinderGeometry(
   20,
   5,
-  Math.PI / 4,
-  Math.PI / 4,
-  new THREE.MeshBasicMaterial({ color: "green" }),
+  -Math.PI/4,
+  -15/toDegrees,
+  32,
+  1,
 );
+
+const testConeMesh = new THREE.Mesh(
+  testConeGeometry,
+  new THREE.MeshBasicMaterial({ color: "blue" })
+);
+
+// const testConeMesh = makeMitreSegment(
+//   20,
+//   5,
+//   Math.PI / 4,
+//   Math.PI / 4,
+//   new THREE.MeshBasicMaterial({ color: "green" }),
+// );
 
 
 const axesHelper = new THREE.AxesHelper(10);
