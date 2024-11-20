@@ -58,9 +58,9 @@ class BevelledCylinderGeometry extends BufferGeometry {
     this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
 
     function generateTorso() {
-      function getIntercept(maxExcess, angle, firstIndex) {
+      function getCorrections(maxExcess, angle, firstIndex) {
         const tanAngle = Math.tan(angle);
-        const x = Number((maxExcess / tanAngle)).toFixed(10);
+        const x = parseFloat((maxExcess / tanAngle).toFixed(10));
 
         const y = maxExcess;
 
@@ -70,13 +70,15 @@ class BevelledCylinderGeometry extends BufferGeometry {
         // if first index is +ve
         if (vertices[firstIndex + 2] > 0) {
           return [
-            [x, y, z],
-            [x, y, -z],
+            [x, length + y, z],
+            [x, length + y, -z],
+            [x, length + y, 0],
           ];
         } else {
           return [
-            [x, y, -z],
-            [x, y, z],
+            [x, length + y, -z],
+            [x, length + y, z],
+            [x, length + y, 0],
           ];
         }
       }
@@ -114,42 +116,63 @@ class BevelledCylinderGeometry extends BufferGeometry {
             length + vertex.x * tanTopAngle
           );
         }
+        console.log("excess", length+maxExcess)
+        if (vertex.y === length + maxExcess) {
+          topLimited = true;
 
+          // get the index of the first and last occurence of limit and step to the next point
+          if (firstLimitVertIndex === null) {
+            // firstLimitVertIndex = (index * 3)+3;
+            firstLimitVertIndex = (index * 3);
+            if (vertices[firstLimitVertIndex+1]>vertices[firstLimitVertIndex+4]) {
+              firstLimitVertIndex +=3;
+            } else {
+              firstLimitVertIndex -=3;
+            }
+          }
 
-        // if ((vertex.y = length + maxExcess)) {
-        //   topLimited = true;
-
-          // get the index of the first and last occurence of limit
-        //   if (firstLimitVertIndex === null) {
-        //     firstLimitVertIndex = index * 3;
-        //   }
-        //   lastLimitVertIndex = index * 3;
-        // }
-        // const [firstIntercept, lastIntercept] = getIntercept(
-        //   maxExcess,
-        //   topAngle,
-        //   firstLimitVertIndex
-        // );
-        // console.log(`first: ${firstIntercept}, last: ${lastIntercept}`);
-
+          lastLimitVertIndex = (index * 3)+3;
+          if (vertices[lastLimitVertIndex+1]>vertices[lastLimitVertIndex+4]) {
+            lastLimitVertIndex +=3;
+          } else {
+            lastLimitVertIndex -=3;
+          }
+        }
+        
         vertex.z = radius * -cosTheta;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
         // save the index of the vertex just generated into indexRow
         indexRow.push(index++);
+
+        console.log(firstLimitVertIndex, lastLimitVertIndex)
       }
+
+        // when mitreLimit is applied, get and implement corrections
+        // if (topLimited) {
+        //   let [firstIntercept, lastIntercept, centreIntercept] = getCorrections(
+        //     maxExcess,
+        //     topAngle,
+        //     firstLimitVertIndex
+        //   );
+
+        //   console.log(`First: ${firstIntercept}, Last: ${lastIntercept}, Centre: ${centreIntercept}`)
+
+          
+        //   vertices.splice(firstLimitVertIndex, 3, ...firstIntercept);
+        //   vertices.splice(lastLimitVertIndex, 3, ...lastIntercept);
+        //   for (let x = 0; x <= radialSegments; x++) {
+            
+        //     vertices.splice(x * 3, 3, ...centreIntercept);
+        //   }
+        // }
+
+
+
+        
+
+      console.log(vertices)
       indexArray.push(indexRow);
-
-      // check if top mitre is limited
-
-      // calculate adjustedX
-      // const adjustedX =
-      // calcualted adjustedZ
-
-      // if (firstLimitVertIndex) {
-      //   vertices[lastLimitVertIndex * 3] = adjustedX;
-      //   vertices[lastLimitVertIndex * 3 + 2] = adjustedZ;
-      // }
 
       indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
@@ -168,8 +191,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
-      // console.log(`L+ME ${length + maxExcess}`)
-      // console.log(`vertices are: ${vertices}`)
 
       indexRow = [];
       const tanBottomAngle = Math.tan(bottomAngle);
@@ -218,11 +239,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
           indices.push(b, c, d);
         }
       }
-
-      // console.log(indexArray);
     }
-
-    // console.log(vertices);
   }
 }
 

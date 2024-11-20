@@ -15,7 +15,7 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 camera.position.z = 60;
-const renderer = new THREE.WebGLRenderer({antialias: "true"});
+const renderer = new THREE.WebGLRenderer({ antialias: "true" });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -23,12 +23,12 @@ const controls = new OrbitControls(camera, renderer.domElement);
 const material = new THREE.MeshBasicMaterial({ color: "orange" });
 
 const testConeGeometry = new BevelledCylinderGeometry(
-  20,
-  5,
-  -Math.PI/4,
-  -15/toDegrees,
-  32,
-  1,
+  Math.sqrt(1700),
+  0.5,
+  -82.98187 / toDegrees,
+  0,
+  7,
+  3
 );
 
 const testConeMesh = new THREE.Mesh(
@@ -44,9 +44,14 @@ const testConeMesh = new THREE.Mesh(
 //   new THREE.MeshBasicMaterial({ color: "green" }),
 // );
 
+const marker = new THREE.SphereGeometry(0.1,16,16)
+const markerMaterial = new THREE.MeshBasicMaterial({color: "green"})
+const markerMesh = new THREE.Mesh(marker, markerMaterial);
+markerMesh.position.set(0.216941869558779,42.7310562561766,0.450484433951209,)
+
 
 const axesHelper = new THREE.AxesHelper(10);
-scene.add(testConeMesh, axesHelper);
+scene.add(testConeMesh, axesHelper, markerMesh);
 function animate() {
   requestAnimationFrame(animate);
   controls.update();

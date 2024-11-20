@@ -12,7 +12,6 @@ export function makeMitreSegment(
   material = undefined,
   mitreLimit = 5
 ) {
-  
   const radius = width / 2;
   const maxExcess = mitreLimit * radius;
 
@@ -103,9 +102,8 @@ export function makeMitreSegment2(
   material = undefined
   // mitreLimit = 5
 ) {
-  
   const radius = width / 2;
-  const radialSegments = 32;
+  const radialSegments = 36;
   // Generate cylinder body
   const segmentGeometry = new BevelledCylinderGeometry(
     length,
@@ -113,9 +111,8 @@ export function makeMitreSegment2(
     topAngle,
     bottomAngle,
     radialSegments,
-    1
+    7
   );
-  
 
   const mitreSegment = new THREE.Mesh(segmentGeometry);
 

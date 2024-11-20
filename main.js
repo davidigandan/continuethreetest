@@ -25,9 +25,9 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 
-camera.position.x = 80;
-camera.position.y = 0;
-camera.position.z = 60;
+camera.position.x = -40;
+camera.position.y = 70;
+camera.position.z = 0;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -46,7 +46,7 @@ const customDataset = [
 
   [0, 0],
   [-10, 40],
-  [-10, 5],
+  [-10, 0],
   // [-120, 0],
 ];
 const randomDataset = generateRandom(0, 100, 1, 0, 50, 5);
@@ -66,16 +66,16 @@ function buildLine(dataset, lineWidth, lineColor) {
     const deltaX1To2 = x2 - x1;
     const deltaY1To2 = y2 - y1;
 
-    const nextSegmentAngle = Math.atan2(deltaX1To2, deltaY1To2);
-
-    let relativeAngle = nextSegmentAngle - currentSegmentAngle;
+    let nextSegmentAngle = Math.atan2(deltaX1To2, deltaY1To2);
 
     // Normalise angles greater than PI to their negative equivalents
-    if (relativeAngle >= Math.PI) {
-      relativeAngle = relativeAngle - 2 * Math.PI;
+    if (nextSegmentAngle >= Math.PI) {
+      nextSegmentAngle = nextSegmentAngle - 2 * Math.PI;
     }
-    const topCutAngle = relativeAngle / 2;
+    const relativeAngle = nextSegmentAngle - currentSegmentAngle;
 
+    console.log(relativeAngle * toDegrees + "relativeAngle");
+    const topCutAngle = relativeAngle / 2;
     return topCutAngle;
   }
 
