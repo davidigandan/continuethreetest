@@ -23,11 +23,11 @@ const controls = new OrbitControls(camera, renderer.domElement);
 const material = new THREE.MeshBasicMaterial({ color: "orange" });
 
 const testConeGeometry = new BevelledCylinderGeometry(
-  Math.sqrt(1700),
+  10,
   0.5,
   -82.98187 / toDegrees,
   0,
-  7,
+  19,
   3
 );
 

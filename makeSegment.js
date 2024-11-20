@@ -111,7 +111,7 @@ export function makeMitreSegment2(
     topAngle,
     bottomAngle,
     radialSegments,
-    7
+    3
   );
 
   const mitreSegment = new THREE.Mesh(segmentGeometry);
