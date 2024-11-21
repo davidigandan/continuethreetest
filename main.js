@@ -1,5 +1,3 @@
-const toDegrees = 180 / Math.PI;
-
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
@@ -24,42 +22,38 @@ const controls = new OrbitControls(camera, renderer.domElement);
 const dataset = generateRandom(0, 100, 1, 0, 50, 5);
 
 const lineBuilder = {
-  thinLine: (dataset, lineColor) => {
+  thinline: (dataset, lineColor) => {
     const points = dataset.map(
       (point) => new THREE.Vector3(point[0], point[1], 0)
     );
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial([color: lineColor])
-    return new THREE.Line(geometry, material)
+    const material = new THREE.LineBasicMaterial({ color: lineColor });
+    return new THREE.Line(geometry, material);
   },
 
-  cylinderline: (dataset, lineColor, lineWidth) => {
+  cylinderline: (dataset, lineColor, lineWidth) => {},
 
-  },
+  csgmitreline: (dataset, lineColor, lineWidth) => {},
 
-  csgMitreLine: (dataset, lineColor, lineWidth) => {
+  bcgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {},
 
-  },
-
-  bcgMitreLine: (dataset, lineColor, lineWidth, mitreLimit) => {
-
-  },
+  // disposals: geometries, lines, meshes, materials = null
 };
 
 // returns either a mesh or a line object that can be added to a scene
 function buildLine(
+  dataset,
   lineType,
   lineColor,
-  dataset,
   lineWidth = null,
   mitreLimit = null
 ) {
-  const builder = lineBuilder[lineType];
-  if (!builder) throw new Error(`Unknown line type: ${lineType}`);
-  return builder(dataset, lineColor, lineWidth, mitreLimit)
+  const builderFunction = lineBuilder[lineType];
+  if (!builderFunction) throw new Error(`Unknown line type: ${lineType}`);
+  return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-const line = buildLine("thinline", "blue", dataset);
+const line = buildLine(dataset, "thinline", "blue");
 scene.add(line);
 
 function animate() {
