@@ -28,10 +28,24 @@ const lineBuilder = {
     );
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({ color: lineColor });
-    return new THREE.Line(geometry, material);
+    const line = new THREE.Line(geometry, material);
+    return line;
   },
 
-  cylinderline: (dataset, lineColor, lineWidth) => {},
+  cylinderline: (dataset, lineColor, lineWidth) => {
+    dataset.forEach((_, i) => {
+      deltaX = dataset[i][0] - dataset[i + 1][0];
+      deltaY = dataset[i][1] - dataset[i + 1][1];
+      const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const segmentAngle = atan2(deltaY, deltaX);
+    });
+
+    const radius = width / 2;
+    const geometry = new THREE.CylinderGeometry(radius, radius, length, 36);
+    const material = new THREE.MeshBasicMaterial({ color: lineColor });
+    const line = new THREE.Mesh(geometry, material);
+    return line;
+  },
 
   csgmitreline: (dataset, lineColor, lineWidth) => {},
 
@@ -53,7 +67,8 @@ function buildLine(
   return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-const line = buildLine(dataset, "thinline", "blue");
+// add some error handling
+const line = buildLine(dataset, "thinline", "blue", "triangle");
 scene.add(line);
 
 function animate() {
