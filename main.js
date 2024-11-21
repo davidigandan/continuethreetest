@@ -3,19 +3,8 @@ const toDegrees = 180 / Math.PI;
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
-import {
-  makeSegment,
-  makeMitreSegment,
-  makeMitreSegment2,
-} from "./makeSegment";
-import { sine, generateRandom } from "./analysis/generateData";
-import { rand } from "three/webgpu";
+import { generateRandom } from "./analysis/generateData";
 
-// Create stats instance
-const stats = new Stats({ trackGPU: true });
-document.body.appendChild(stats.dom);
-
-// Setup scene, camera, renderer
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
 const camera = new THREE.PerspectiveCamera(
@@ -25,143 +14,57 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 
-camera.position.x = -40;
-camera.position.y = 70;
-camera.position.z = 0;
+camera.position.z = 5;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-
-// Initialize stats with the renderer
-stats.init(renderer);
-
-// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-const customDataset = [
-  // [0, 0],
-  // [10, 10],
-  // [15, 5],
-  // [40, 40],
 
-  [0, 0],
-  [-10, 40],
-  [-10, 0],
-  // [-120, 0],
-];
-const randomDataset = generateRandom(0, 100, 1, 0, 50, 5);
+const dataset = generateRandom(0, 100, 1, 0, 50, 5);
 
-const sineDataset = sine(0, 2 * Math.PI, Math.PI / 4);
-
-function buildLine(dataset, lineWidth, lineColor) {
-  const meshesOfLine = [];
-  const material = new THREE.MeshBasicMaterial({ color: lineColor });
-
-  let startBottomAngle = 0;
-  let endTopAngle = 0;
-
-  function getTopCut([x1, y1], [x2, y2], currentSegmentAngle) {
-    // NEXT SEGMENT CALCULATIONS
-    // change between points dp[current+1] and dp[current+2]
-    const deltaX1To2 = x2 - x1;
-    const deltaY1To2 = y2 - y1;
-
-    let nextSegmentAngle = Math.atan2(deltaX1To2, deltaY1To2);
-
-    // Normalise angles greater than PI to their negative equivalents
-    if (nextSegmentAngle >= Math.PI) {
-      nextSegmentAngle = nextSegmentAngle - 2 * Math.PI;
-    }
-    const relativeAngle = nextSegmentAngle - currentSegmentAngle;
-
-    console.log(relativeAngle * toDegrees + "relativeAngle");
-    const topCutAngle = relativeAngle / 2;
-    return topCutAngle;
-  }
-
-  // Loop helper variables (from last loop)
-  let bottomCutAngle = 0;
-
-  for (let i = 0; i < dataset.length - 1; i++) {
-    //don't compose a segment on last datapoint
-    if (i % 100 === 0) {
-      console.log(`run number: ${i} time`);
-    }
-
-    // ------------------------------------------------------------------------------------------------------------------------------------------------
-    //CURRENT SEGMENT CALCULATIONS
-    // change between points dp[current] and dp[current+1]
-    const deltaXTo1 = dataset[i + 1][0] - dataset[i][0];
-    const deltaYTo1 = dataset[i + 1][1] - dataset[i][1];
-
-    // calculate length to next datapoint(currentSegmentLength)
-    const currentSegmentLength = Math.hypot(deltaXTo1, deltaYTo1);
-    // console.log(`Current segment length is ${currentSegmentLength}`)
-
-    // calculate angle of current segment
-    const currentSegmentAngle = Math.atan2(deltaXTo1, deltaYTo1);
-
-    let topCutAngle;
-
-    if (i < dataset.length - 2) {
-      topCutAngle = getTopCut(
-        dataset[i + 1],
-        dataset[i + 2],
-        currentSegmentAngle,
-        i
-      );
-    } else {
-      topCutAngle = 0;
-    }
-    console.log(
-      `top angle ${topCutAngle * toDegrees}, Bottomcut angle ${
-        bottomCutAngle * toDegrees
-      }`
+const lineBuilder = {
+  thinLine: (dataset, lineColor) => {
+    const points = dataset.map(
+      (point) => new THREE.Vector3(point[0], point[1], 0)
     );
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial([color: lineColor])
+    return new THREE.Line(geometry, material)
+  },
 
-    const segment = makeMitreSegment2(
-      currentSegmentLength,
-      lineWidth,
-      topCutAngle,
-      bottomCutAngle,
-      material
-    );
+  cylinderline: (dataset, lineColor, lineWidth) => {
 
-    bottomCutAngle = topCutAngle;
+  },
 
-    segment.rotateZ(-currentSegmentAngle);
-    segment.position.x = dataset[i][0];
-    segment.position.y = dataset[i][1];
+  csgMitreLine: (dataset, lineColor, lineWidth) => {
 
-    // call makeSegment
-    meshesOfLine.push(segment);
-  }
-  return meshesOfLine;
+  },
+
+  bcgMitreLine: (dataset, lineColor, lineWidth, mitreLimit) => {
+
+  },
+};
+
+// returns either a mesh or a line object that can be added to a scene
+function buildLine(
+  lineType,
+  lineColor,
+  dataset,
+  lineWidth = null,
+  mitreLimit = null
+) {
+  const builder = lineBuilder[lineType];
+  if (!builder) throw new Error(`Unknown line type: ${lineType}`);
+  return builder(dataset, lineColor, lineWidth, mitreLimit)
 }
 
-let timeTaken = -performance.now();
-const meshes = buildLine(customDataset, 1, "purple");
-
-meshes.forEach((mesh, i) => {
-  // mesh.material = new THREE.MeshBasicMaterial({ color: colorWheel[i] });
-  scene.add(mesh);
-});
-
-const axesHelper = new THREE.AxesHelper(40);
-scene.add(axesHelper);
-camera.lookAt(80, 0, 0);
-controls.update();
-// renderer.render(scene, camera)
-timeTaken += performance.now();
-console.log(timeTaken / 1000);
+const line = buildLine("thinline", "blue", dataset);
+scene.add(line);
 
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
-  stats.update(); // Add stats update call
 }
 
 animate();
-
-// Mesh output disposal
-console.log("Current memory use:", renderer.info);
