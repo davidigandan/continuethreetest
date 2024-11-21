@@ -58,31 +58,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
     this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
 
     function generateTorso() {
-      function getCorrections(angle, firstIndex) {
-        const tanAngle = Math.tan(angle);
-        const x = parseFloat((maxExcess / tanAngle).toFixed(10));
-
-        const y = maxExcess;
-
-        const currTheta = Math.asin(x / radius);
-        const z = x * Math.cos(currTheta);
-
-        // if first index is +ve
-        if (vertices[firstIndex + 2] > 0) {
-          return [
-            [x, length + y, z],
-            [x, length + y, -z],
-            [x, length + y, 0],
-          ];
-        } else {
-          return [
-            [x, length + y, -z],
-            [x, length + y, z],
-            [x, length + y, 0],
-          ];
-        }
-      }
-
       // generate cover
       let indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
@@ -95,10 +70,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
       const vertex = new Vector3();
       const tanTopAngle = Math.tan(-topAngle);
 
-      let topLimited = null;
       indexRow = [];
-      let firstLimitVertIndex = null;
-      let lastLimitVertIndex = null;
       let prevPointBelowLimit = true; // previous point was below the limit
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
@@ -108,13 +80,14 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         // vertex
         vertex.x = radius * sinTheta;
-        let deltaY = vertex.x * tanTopAngle;
 
+        let deltaY = vertex.x * tanTopAngle;
         if (deltaY > maxExcess) {
           deltaY = maxExcess;
 
           if (prevPointBelowLimit) {
-            prevPointBelowLimit = false;
+            // if it's the first limit
+            prevPointBelowLimit = false; // helper variable for next loop
 
             const x = maxExcess / tanTopAngle;
             const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
@@ -138,34 +111,13 @@ class BevelledCylinderGeometry extends BufferGeometry {
           }
         }
 
-        vertex.y = length + deltaY
+        vertex.y = length + deltaY;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
         // save the index of the vertex just generated into indexRow
         indexRow.push(index++);
-
-        console.log(firstLimitVertIndex, lastLimitVertIndex);
       }
 
-      // when mitreLimit is applied, get and implement corrections
-      if (topLimited) {
-        let [firstIntercept, lastIntercept, centreIntercept] = getCorrections(
-          topAngle,
-          firstLimitVertIndex
-        );
-
-        console.log(
-          `First: ${firstIntercept}, Last: ${lastIntercept}, Centre: ${centreIntercept}`
-        );
-
-        vertices.splice(firstLimitVertIndex, 3, ...firstIntercept);
-        vertices.splice(lastLimitVertIndex, 3, ...lastIntercept);
-        for (let x = 0; x <= radialSegments; x++) {
-          vertices.splice(x * 3, 3, ...centreIntercept);
-        }
-      }
-
-      console.log(vertices);
       indexArray.push(indexRow);
 
       indexRow = [];
@@ -188,7 +140,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
       indexRow = [];
       const tanBottomAngle = Math.tan(bottomAngle);
-
+      let prevPointAboveLimit = true;
       for (let x = 0; x <= radialSegments; x++) {
         const u = x / radialSegments;
         const theta = u * 2 * Math.PI;
@@ -197,13 +149,38 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
         // vertex
         vertex.x = radius * sinTheta;
+        let deltaY = vertex.x * tanBottomAngle;
 
-        vertex.y = vertex.x * tanBottomAngle;
-        if (vertex.y < 0) {
-          vertex.y = Math.max(-maxExcess, vertex.y);
+        if (deltaY < -maxExcess) {
+          // if we're in the limited region
+          deltaY = -maxExcess;
+
+          if (prevPointAboveLimit) {
+            prevPointAboveLimit = false; // helper variable for next loop
+
+            const x = -maxExcess / tanBottomAngle;
+            const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
+            vertex.z = cosTheta > 0 ? -z : z;
+            vertex.x = x;
+          } else {
+            vertex.z = radius * -cosTheta;
+          }
+        } else {
+          if (prevPointAboveLimit) {
+            vertex.z = radius * -cosTheta;
+          } else {
+            prevPointAboveLimit = true;
+
+            const x = -maxExcess / tanBottomAngle;
+            const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
+            vertex.z = cosTheta > 0 ? -z : z;
+            vertex.x = x;
+
+            deltaY = -maxExcess;
+          }
         }
 
-        vertex.z = radius * -cosTheta;
+        vertex.y = deltaY;
         vertices.push(vertex.x, vertex.y, vertex.z);
 
         // save the index of the vertex just generated into indexRow
