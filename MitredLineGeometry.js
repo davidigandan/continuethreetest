@@ -7,46 +7,32 @@ import {
   Vector2,
 } from "three";
 
-class BevelledCylinderGeometry extends BufferGeometry {
-  constructor(
-    length,
-    radius,
-    topAngle,
-    bottomAngle,
-    radialSegments,
-    mitreLimit
-  ) {
+class MitredLineGeometry extends BufferGeometry {
+  constructor(dataset, lineWidth, radialSegments, mitreLimit) {
     super();
 
-    this.type = "BevelledCylinderGeometry";
+    this.type = "MitredLineGeometry";
 
     this.parameters = {
-      radius: radius,
-      length: length,
+      dataset: dataset,
+      lineWidth: lineWidth,
       radialSegments: radialSegments,
+      mitreLimit,
     };
-
-    const scope = this;
 
     radialSegments = Math.floor(radialSegments);
 
     // top and bottom helpers
     const maxExcess = mitreLimit * radius;
-
-    // const topExcess = Math.min(maxExcess, radius * Math.tan(topAngle));
     const topExcess = radius * Math.tan(topAngle);
-    // const bottomExcess = Math.max(-maxExcess, radius * Math.tan(bottomAngle));
     const bottomExcess = radius * Math.tan(bottomAngle);
-
     const midHeight = (length - topExcess + bottomExcess) / 2;
 
     // buffers
-
     const indices = [];
     const vertices = [];
 
     // helper variables
-
     let index = 0;
     const indexArray = [];
 
@@ -59,15 +45,19 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
     function generateTorso() {
       // generate cover
+      const lastDataPoint = new Vector3(
+        dataset[dataset.length - 1][0],
+        dataset[dataset.length - 1][1],
+        0
+      );
       let indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
-        vertices.push(0, length, 0);
+        vertices.push(lastDataPoint.x, lastDataPoint.y, lastDataPoint.z);
         indexRow.push(index++);
       }
       indexArray.push(indexRow);
 
       for (let i = 0; i < dataset.length - 1; i++) {
-        
         // generate vertices
         const vertex = new Vector3();
         const tanTopAngle = Math.tan(-topAngle);
@@ -199,4 +189,4 @@ class BevelledCylinderGeometry extends BufferGeometry {
   }
 }
 
-export { BevelledCylinderGeometry };
+export { MitredLineGeometry };

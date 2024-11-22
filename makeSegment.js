@@ -2,7 +2,7 @@ const toDegrees = 180 / Math.PI;
 
 import * as THREE from "three";
 import { CSG } from "three-csg-ts";
-import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry";
+import { BevelledCylinderGeometry } from "./MitredLineGeometry";
 
 export function makeMitreSegment(
   length = 20,

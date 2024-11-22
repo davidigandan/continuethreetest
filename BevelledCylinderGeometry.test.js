@@ -1,4 +1,4 @@
-import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry";
+import { BevelledCylinderGeometry } from "./MitredLineGeometry";
 
 const toDegrees = 180 / Math.PI;
 
@@ -21,5 +21,3 @@ test("properly limits vertex height", () => {
     expect(y).toBeLessThanOrEqual(length + 3 * 0.5 + error);
   }
 });
-
-
