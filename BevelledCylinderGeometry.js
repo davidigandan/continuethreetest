@@ -121,24 +121,6 @@ class BevelledCylinderGeometry extends BufferGeometry {
       indexArray.push(indexRow);
 
       indexRow = [];
-      for (let x = 0; x <= radialSegments; x++) {
-        const u = x / radialSegments;
-        const theta = u * 2 * Math.PI;
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
-
-        // vertex
-        vertex.x = radius * sinTheta;
-        vertex.y = midHeight;
-        vertex.z = radius * -cosTheta;
-        vertices.push(vertex.x, vertex.y, vertex.z);
-
-        // save the index of the vertex just generated into indexRow
-        indexRow.push(index++);
-      }
-      indexArray.push(indexRow);
-
-      indexRow = [];
       const tanBottomAngle = Math.tan(bottomAngle);
       let prevPointAboveLimit = true;
       for (let x = 0; x <= radialSegments; x++) {
@@ -198,7 +180,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
       // generate all indices
       for (let x = 0; x < radialSegments; x++) {
-        for (let y = 0; y < 4; y++) {
+        for (let y = 0; y < 3; y++) {
           // assemble a square
 
           const a = indexArray[y][x];
