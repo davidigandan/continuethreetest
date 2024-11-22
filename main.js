@@ -4,6 +4,7 @@ import Stats from "stats-gl";
 import { generateRandom } from "./analysis/generateData";
 import { Vector3 } from "three/src/Three.js";
 import { CSG } from "three-csg-ts";
+import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry";
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
@@ -21,7 +22,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const dataset = generateRandom(0, 100, 1, 0, 50, 5);
+const dataset = generateRandom(0, 10, 1, 0, 50, 5);
 // const dataset = [
 //   [0, 0],
 //   [40, 40],
@@ -30,6 +31,24 @@ const dataset = generateRandom(0, 100, 1, 0, 50, 5);
 // ];
 
 const lineBuilder = {
+  // helper function
+  getTopCut: ([x1, y1], [x2, y2], currentSegmentAngle) => {
+    // NEXT SEGMENT CALCULATIONS
+    // change between points dp[current+1] and dp[current+2]
+    const deltaX1To2 = x2 - x1;
+    const deltaY1To2 = y2 - y1;
+
+    let nextSegmentAngle = Math.atan2(deltaX1To2, deltaY1To2);
+
+    // Normalise angles greater than PI to their negative equivalents
+    if (nextSegmentAngle >= Math.PI) {
+      nextSegmentAngle = nextSegmentAngle - 2 * Math.PI;
+    }
+    const relativeAngle = nextSegmentAngle - currentSegmentAngle;
+
+    const topCutAngle = relativeAngle / 2;
+    return topCutAngle;
+  },
   /**
    * Creates a simple line through the given data points using THREE.Line
    * @param {Array<Array<number>>} dataset - Array of [x,y] coordinates defining the line vertices
@@ -120,24 +139,6 @@ const lineBuilder = {
     const radius = lineWidth / 2;
     const maxExcess = mitreLimit * radius;
 
-    function getTopCut([x1, y1], [x2, y2], currentSegmentAngle) {
-      // NEXT SEGMENT CALCULATIONS
-      // change between points dp[current+1] and dp[current+2]
-      const deltaX1To2 = x2 - x1;
-      const deltaY1To2 = y2 - y1;
-
-      let nextSegmentAngle = Math.atan2(deltaX1To2, deltaY1To2);
-
-      // Normalise angles greater than PI to their negative equivalents
-      if (nextSegmentAngle >= Math.PI) {
-        nextSegmentAngle = nextSegmentAngle - 2 * Math.PI;
-      }
-      const relativeAngle = nextSegmentAngle - currentSegmentAngle;
-
-      const topCutAngle = relativeAngle / 2;
-      return topCutAngle;
-    }
-
     let bottomCutAngle = 0;
 
     let lineSegments = [];
@@ -151,7 +152,7 @@ const lineBuilder = {
 
       let topCutAngle;
       if (i < dataset.length - 2) {
-        topCutAngle = getTopCut(
+        topCutAngle = lineBuilder["getTopCut"](
           dataset[i + 1],
           dataset[i + 2],
           currSegmentAngle
@@ -159,6 +160,7 @@ const lineBuilder = {
       } else {
         topCutAngle = 0;
       }
+
       const topExcess =
         radius * Math.min(maxExcess, Math.abs(Math.tan(topCutAngle)));
       const bottomExcess =
@@ -238,7 +240,50 @@ const lineBuilder = {
     return lineSegments;
   },
 
-  bcgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {},
+  bcgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {
+    const material = new THREE.MeshBasicMaterial({ color: lineColor });
+    const radius = lineWidth / 2;
+    let bottomCutAngle = 0;
+
+    let lineSegments = [];
+    for (let i = 0; i < dataset.length - 1; i++) {
+      const position = new Vector3(dataset[i][0], dataset[i][1], 0);
+
+      const deltaXTo1 = dataset[i + 1][0] - dataset[i][0];
+      const deltaYTo1 = dataset[i + 1][1] - dataset[i][1];
+
+      const currSegmentLength = Math.hypot(deltaXTo1, deltaYTo1);
+      const currSegmentAngle = Math.atan2(deltaXTo1, deltaYTo1);
+
+      let topCutAngle;
+      if (i < dataset.length - 2) {
+        topCutAngle = lineBuilder["getTopCut"](
+          dataset[i + 1],
+          dataset[i + 2],
+          currSegmentAngle
+        );
+      } else {
+        topCutAngle = 0;
+      }
+
+      const segmentGeometry = new BevelledCylinderGeometry(
+        currSegmentLength,
+        radius,
+        topCutAngle,
+        bottomCutAngle,
+        36,
+        mitreLimit
+      );
+
+      const mesh = new THREE.Mesh(segmentGeometry, material);
+      mesh.position.set(position.x, position.y, position.z);
+      mesh.rotateZ(-currSegmentAngle);
+      lineSegments.push(mesh);
+      bottomCutAngle = topCutAngle;
+    }
+
+    return lineSegments;
+  },
 
   // disposals: geometries, lines, meshes, materials = null
 };
@@ -256,7 +301,7 @@ function buildLine(
   return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-const line = buildLine(dataset, "csgmitreline", "blue", 2, 1);
+const line = buildLine(dataset, "bcgmitreline", "blue", 1, 5);
 if (Array.isArray(line)) {
   line.forEach((mesh) => scene.add(mesh));
 } else {
