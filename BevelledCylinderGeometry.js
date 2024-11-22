@@ -66,128 +66,112 @@ class BevelledCylinderGeometry extends BufferGeometry {
       }
       indexArray.push(indexRow);
 
-      // generate vertices
-      const vertex = new Vector3();
-      const tanTopAngle = Math.tan(-topAngle);
+      for (let i = 0; i < dataset.length - 1; i++) {
+        
+        // generate vertices
+        const vertex = new Vector3();
+        const tanTopAngle = Math.tan(-topAngle);
 
-      indexRow = [];
-      let prevPointBelowLimit = true; // previous point was below the limit
-      for (let x = 0; x <= radialSegments; x++) {
-        const u = x / radialSegments;
-        const theta = u * 2 * Math.PI;
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
+        indexRow = [];
+        let prevPointBelowLimit = true; // previous point was below the limit
+        for (let x = 0; x <= radialSegments; x++) {
+          const u = x / radialSegments;
+          const theta = u * 2 * Math.PI;
+          const sinTheta = Math.sin(theta);
+          const cosTheta = Math.cos(theta);
 
-        // vertex
-        vertex.x = radius * sinTheta;
+          // vertex
+          vertex.x = radius * sinTheta;
 
-        let deltaY = vertex.x * tanTopAngle;
-        if (deltaY > maxExcess) {
-          deltaY = maxExcess;
-
-          if (prevPointBelowLimit) {
-            // if it's the first limit
-            prevPointBelowLimit = false; // helper variable for next loop
-
-            const x = maxExcess / tanTopAngle;
-            const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
-            vertex.z = cosTheta > 0 ? -z : z; // radius * -cosTheta
-            vertex.x = x;
-          } else {
-            vertex.z = radius * -cosTheta;
-          }
-        } else {
-          if (prevPointBelowLimit) {
-            vertex.z = radius * -cosTheta;
-          } else {
-            prevPointBelowLimit = true;
-
-            const x = maxExcess / tanTopAngle;
-            const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
-            vertex.z = cosTheta > 0 ? -z : z; // radius * -cosTheta
-            vertex.x = x;
-
+          let deltaY = vertex.x * tanTopAngle;
+          if (deltaY > maxExcess) {
             deltaY = maxExcess;
+
+            if (prevPointBelowLimit) {
+              // if it's the first limit
+              prevPointBelowLimit = false; // helper variable for next loop
+
+              const x = maxExcess / tanTopAngle;
+              const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
+              vertex.z = cosTheta > 0 ? -z : z; // radius * -cosTheta
+              vertex.x = x;
+            } else {
+              vertex.z = radius * -cosTheta;
+            }
+          } else {
+            if (prevPointBelowLimit) {
+              vertex.z = radius * -cosTheta;
+            } else {
+              prevPointBelowLimit = true;
+
+              const x = maxExcess / tanTopAngle;
+              const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
+              vertex.z = cosTheta > 0 ? -z : z; // radius * -cosTheta
+              vertex.x = x;
+
+              deltaY = maxExcess;
+            }
           }
+
+          vertex.y = length + deltaY;
+          vertices.push(vertex.x, vertex.y, vertex.z);
+
+          // save the index of the vertex just generated into indexRow
+          indexRow.push(index++);
         }
 
-        vertex.y = length + deltaY;
-        vertices.push(vertex.x, vertex.y, vertex.z);
+        indexArray.push(indexRow);
 
-        // save the index of the vertex just generated into indexRow
-        indexRow.push(index++);
-      }
+        indexRow = [];
+        const tanBottomAngle = Math.tan(bottomAngle);
+        let prevPointAboveLimit = true;
+        for (let x = 0; x <= radialSegments; x++) {
+          const u = x / radialSegments;
+          const theta = u * 2 * Math.PI;
+          const sinTheta = Math.sin(theta);
+          const cosTheta = Math.cos(theta);
 
-      indexArray.push(indexRow);
+          // vertex
+          vertex.x = radius * sinTheta;
+          let deltaY = vertex.x * tanBottomAngle;
 
-      indexRow = [];
-      for (let x = 0; x <= radialSegments; x++) {
-        const u = x / radialSegments;
-        const theta = u * 2 * Math.PI;
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
-
-        // vertex
-        vertex.x = radius * sinTheta;
-        vertex.y = midHeight;
-        vertex.z = radius * -cosTheta;
-        vertices.push(vertex.x, vertex.y, vertex.z);
-
-        // save the index of the vertex just generated into indexRow
-        indexRow.push(index++);
-      }
-      indexArray.push(indexRow);
-
-      indexRow = [];
-      const tanBottomAngle = Math.tan(bottomAngle);
-      let prevPointAboveLimit = true;
-      for (let x = 0; x <= radialSegments; x++) {
-        const u = x / radialSegments;
-        const theta = u * 2 * Math.PI;
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
-
-        // vertex
-        vertex.x = radius * sinTheta;
-        let deltaY = vertex.x * tanBottomAngle;
-
-        if (deltaY < -maxExcess) {
-          // if we're in the limited region
-          deltaY = -maxExcess;
-
-          if (prevPointAboveLimit) {
-            prevPointAboveLimit = false; // `helper variable for next loop
-
-            const x = -maxExcess / tanBottomAngle;
-            const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
-            vertex.z = cosTheta > 0 ? -z : z;
-            vertex.x = x;
-          } else {
-            vertex.z = radius * -cosTheta;
-          }
-        } else {
-          if (prevPointAboveLimit) {
-            vertex.z = radius * -cosTheta;
-          } else {
-            prevPointAboveLimit = true;
-
-            const x = -maxExcess / tanBottomAngle;
-            const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
-            vertex.z = cosTheta > 0 ? -z : z;
-            vertex.x = x;
-
+          if (deltaY < -maxExcess) {
+            // if we're in the limited region
             deltaY = -maxExcess;
+
+            if (prevPointAboveLimit) {
+              prevPointAboveLimit = false; // `helper variable for next loop
+
+              const x = -maxExcess / tanBottomAngle;
+              const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
+              vertex.z = cosTheta > 0 ? -z : z;
+              vertex.x = x;
+            } else {
+              vertex.z = radius * -cosTheta;
+            }
+          } else {
+            if (prevPointAboveLimit) {
+              vertex.z = radius * -cosTheta;
+            } else {
+              prevPointAboveLimit = true;
+
+              const x = -maxExcess / tanBottomAngle;
+              const z = Math.sqrt(Math.max(radius * radius - x * x, 0));
+              vertex.z = cosTheta > 0 ? -z : z;
+              vertex.x = x;
+
+              deltaY = -maxExcess;
+            }
           }
+
+          vertex.y = deltaY;
+          vertices.push(vertex.x, vertex.y, vertex.z);
+
+          // save the index of the vertex just generated into indexRow
+          indexRow.push(index++);
         }
-
-        vertex.y = deltaY;
-        vertices.push(vertex.x, vertex.y, vertex.z);
-
-        // save the index of the vertex just generated into indexRow
-        indexRow.push(index++);
+        indexArray.push(indexRow);
       }
-      indexArray.push(indexRow);
-
       // generate bottom cover
       indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
@@ -198,7 +182,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
 
       // generate all indices
       for (let x = 0; x < radialSegments; x++) {
-        for (let y = 0; y < 4; y++) {
+        for (let y = 0; y < 3; y++) {
           // assemble a square
 
           const a = indexArray[y][x];

@@ -22,7 +22,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const dataset = generateRandom(0, 100, 3, 0, 50, 5);
+const dataset = generateRandom(0, 300, 3, 0, 50, 5);
 // const dataset = [
 //   [0, 0],
 //   [40, 40],
