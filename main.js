@@ -22,7 +22,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const dataset = generateRandom(0, 10, 1, 0, 50, 5);
+const dataset = generateRandom(0, 100, 3, 0, 50, 5);
 // const dataset = [
 //   [0, 0],
 //   [40, 40],
@@ -301,7 +301,7 @@ function buildLine(
   return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-const line = buildLine(dataset, "bcgmitreline", "blue", 1, 5);
+const line = buildLine(dataset, "bcgmitreline", "blue", 1, 10);
 if (Array.isArray(line)) {
   line.forEach((mesh) => scene.add(mesh));
 } else {
