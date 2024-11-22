@@ -3,6 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
 import { generateRandom } from "./analysis/generateData";
 import { Vector3 } from "three/src/Three.js";
+import { CSG } from "three-csg-ts";
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
@@ -29,6 +30,17 @@ const dataset = generateRandom(0, 100, 1, 0, 50, 5);
 // ];
 
 const lineBuilder = {
+  /**
+   * Creates a simple line through the given data points using THREE.Line
+   * @param {Array<Array<number>>} dataset - Array of [x,y] coordinates defining the line vertices
+   * @param {(string|number)} lineColor - Color of the line, can be hex number or CSS color string
+   * @returns {THREE.Line} A single THREE.Line object representing the path
+   *
+   * @example
+   * const data = [[0,0], [1,1], [2,0]];
+   * const line = thinline(data, 0x0000ff); // Blue line
+   * scene.add(line);
+   */
   thinline: (dataset, lineColor) => {
     const points = dataset.map(
       (point) => new THREE.Vector3(point[0], point[1], 0)
@@ -39,6 +51,24 @@ const lineBuilder = {
     return line;
   },
 
+  /**
+   * Creates a 3D line using cylindrical segments between consecutive points
+   * @param {Array<Array<number>>} dataset - Array of [x,y] coordinates defining the line path
+   * @param {(string|number)} lineColor - Color of the line, can be hex number or CSS color string
+   * @param {number} lineWidth - Diameter of the cylindrical segments
+   * @returns {Array<THREE.Mesh>} Array of cylindrical meshes forming the line segments
+   *
+   * @description
+   * Creates a line by placing cylinders between consecutive points. Each cylinder is:
+   * - Oriented using atan2 to point to the next coordinate
+   * - Scaled to exactly reach between its two defining points
+   * - Positioned at the starting point of its segment
+   *
+   * @example
+   * const data = [[0,0], [1,1], [2,0]];
+   * const segments = cylinderline(data, 0x0000ff, 0.1); // Blue line, 0.1 units thick
+   * segments.forEach(mesh => scene.add(mesh));
+   */
   cylinderline: (dataset, lineColor, lineWidth) => {
     let lineSegments = [];
     for (let i = 0; i < dataset.length - 1; i++) {
@@ -61,7 +91,127 @@ const lineBuilder = {
     return lineSegments;
   },
 
-  csgmitreline: (dataset, lineColor, lineWidth) => {},
+  csgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {
+    const radius = lineWidth / 2;
+    const maxExcess = mitreLimit * radius;
+
+    function getTopCut([x1, y1], [x2, y2], currentSegmentAngle) {
+      // NEXT SEGMENT CALCULATIONS
+      // change between points dp[current+1] and dp[current+2]
+      const deltaX1To2 = x2 - x1;
+      const deltaY1To2 = y2 - y1;
+
+      let nextSegmentAngle = Math.atan2(deltaX1To2, deltaY1To2);
+
+      // Normalise angles greater than PI to their negative equivalents
+      if (nextSegmentAngle >= Math.PI) {
+        nextSegmentAngle = nextSegmentAngle - 2 * Math.PI;
+      }
+      const relativeAngle = nextSegmentAngle - currentSegmentAngle;
+
+      const topCutAngle = relativeAngle / 2;
+      return topCutAngle;
+    }
+
+    let bottomCutAngle = 0;
+
+    let lineSegments = [];
+    for (let i = 0; i < dataset.length - 1; i++) {
+      // calcualate angle
+      const deltaXTo1 = dataset[i + 1][0] - dataset[i][0];
+      const deltaYTo1 = dataset[i + 1][1] - dataset[i][1];
+
+      const currSegmentLength = Math.hypot(deltaXTo1, deltaYTo1);
+      const currSegmentAngle = Math.atan2(deltaXTo1, deltaYTo1);
+
+      let topCutAngle;
+      if (i < dataset.length - 2) {
+        topCutAngle = getTopCut(
+          dataset[i + 1],
+          dataset[i + 2],
+          currSegmentAngle,
+        );
+      } else {
+        topCutAngle = 0;
+      }
+      const topExcess =
+        radius * Math.min(maxExcess, Math.abs(Math.tan(topCutAngle)));
+      const bottomExcess =
+        radius * Math.min(maxExcess, Math.abs(Math.tan(bottomCutAngle)));
+
+      // Generate cylinder body
+      const precutLength = topExcess + bottomExcess + currSegmentLength;
+      const geometry = new THREE.CylinderGeometry(
+        radius,
+        radius,
+        precutLength,
+        36
+      );
+      const cylinder = new THREE.Mesh(geometry);
+
+      // Create topCube
+      const topCubeWidth = lineWidth / Math.cos(topCutAngle);
+      const topCubeGeometry = new THREE.BoxGeometry(
+        topCubeWidth,
+        topCubeWidth,
+        topCubeWidth
+      );
+      const topCube = new THREE.Mesh(topCubeGeometry);
+
+      // Position topCube
+      topCube.geometry.translate(0, topCubeWidth / 2, 0);
+      topCube.geometry.rotateZ(-topCutAngle); //rotate topCube
+      const topShift = (currSegmentLength + bottomExcess - topExcess) / 2;
+      topCube.geometry.translate(0, topShift, 0);
+
+      // Top subtraction
+      const topTip = CSG.intersect(cylinder, topCube);
+      const slicedCylinderTemp = CSG.subtract(cylinder, topTip);
+
+      // Generate bottom cube
+      const bottomCubeWidth = lineWidth / Math.cos(bottomCutAngle);
+      const bottomCubeGeometry = new THREE.BoxGeometry(
+        bottomCubeWidth,
+        bottomCubeWidth,
+        bottomCubeWidth
+      );
+      const bottomCube = new THREE.Mesh(bottomCubeGeometry);
+
+      // Position bottomCube
+      bottomCube.geometry.translate(0, -bottomCubeWidth / 2, 0);
+      bottomCube.geometry.rotateZ(bottomCutAngle); //rotate bottomCube
+      const bottomShift = (currSegmentLength + topExcess - bottomExcess) / 2;
+      bottomCube.geometry.translate(0, -bottomShift, 0);
+
+      // Bottom subtraction
+      const bottomTip = CSG.intersect(slicedCylinderTemp, bottomCube);
+      let slicedCylinder = CSG.subtract(slicedCylinderTemp, bottomTip);
+
+      // Move bottom to world origin
+      const bottomToOrigin = precutLength / 2 - bottomExcess;
+      slicedCylinder.geometry.translate(0, bottomToOrigin, 0);
+
+      const material = new THREE.MeshBasicMaterial({ color: lineColor });
+      slicedCylinder = new THREE.Mesh(slicedCylinder.geometry, material);
+
+      // Disposal
+      cylinder.geometry.dispose();
+      topCube.geometry.dispose();
+      bottomCube.geometry.dispose();
+      topTip.geometry.dispose();
+      bottomTip.geometry.dispose();
+      slicedCylinderTemp.geometry.dispose();
+
+      slicedCylinder.rotateZ(-currSegmentAngle);
+      slicedCylinder.position.x = dataset[i][0];
+      slicedCylinder.position.y = dataset[i][1];
+      lineSegments.push(slicedCylinder);
+
+      bottomCutAngle = topCutAngle;
+    }
+
+    return lineSegments;
+  },
 
   bcgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {},
 
@@ -81,7 +231,7 @@ function buildLine(
   return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-const line = buildLine(dataset, "cylinderline", "blue", 2);
+const line = buildLine(dataset, "csgmitreline", "blue", 2, 1);
 if (Array.isArray(line)) {
   line.forEach((mesh) => scene.add(mesh));
 } else {
