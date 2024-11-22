@@ -156,7 +156,7 @@ class BevelledCylinderGeometry extends BufferGeometry {
           deltaY = -maxExcess;
 
           if (prevPointAboveLimit) {
-            prevPointAboveLimit = false; // helper variable for next loop
+            prevPointAboveLimit = false; // `helper variable for next loop
 
             const x = -maxExcess / tanBottomAngle;
             const z = Math.sqrt(Math.max(radius * radius - x * x, 0));

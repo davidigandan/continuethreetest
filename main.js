@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import Stats from "stats-gl";
 import { generateRandom } from "./analysis/generateData";
+import { Vector3 } from "three/src/Three.js";
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
@@ -20,6 +21,12 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
 const dataset = generateRandom(0, 100, 1, 0, 50, 5);
+// const dataset = [
+//   [0, 0],
+//   [40, 40],
+//   [80, 0],
+//   [120,40],
+// ];
 
 const lineBuilder = {
   thinline: (dataset, lineColor) => {
@@ -33,18 +40,25 @@ const lineBuilder = {
   },
 
   cylinderline: (dataset, lineColor, lineWidth) => {
-    dataset.forEach((_, i) => {
-      deltaX = dataset[i][0] - dataset[i + 1][0];
-      deltaY = dataset[i][1] - dataset[i + 1][1];
+    let lineSegments = [];
+    for (let i = 0; i < dataset.length - 1; i++) {
+      const deltaX = dataset[i + 1][0] - dataset[i][0];
+      const deltaY = dataset[i + 1][1] - dataset[i][1];
       const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      const segmentAngle = atan2(deltaY, deltaX);
-    });
-
-    const radius = width / 2;
-    const geometry = new THREE.CylinderGeometry(radius, radius, length, 36);
-    const material = new THREE.MeshBasicMaterial({ color: lineColor });
-    const line = new THREE.Mesh(geometry, material);
-    return line;
+      const segmentAngle = Math.atan2(deltaX, deltaY);
+      const position = new Vector3(dataset[i][0], dataset[i][1], 0);
+      const radius = lineWidth / 2;
+      const geometry = new THREE.CylinderGeometry(radius, radius, length, 36);
+      geometry.translate(0, length / 2, 0);
+      geometry.rotateZ(-segmentAngle);
+      const mesh = new THREE.Mesh(
+        geometry,
+        new THREE.MeshBasicMaterial({ color: lineColor })
+      );
+      mesh.position.set(position.x, position.y, position.z);
+      lineSegments.push(mesh);
+    }
+    return lineSegments;
   },
 
   csgmitreline: (dataset, lineColor, lineWidth) => {},
@@ -67,9 +81,12 @@ function buildLine(
   return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-// add some error handling
-const line = buildLine(dataset, "thinline", "blue", "triangle");
-scene.add(line);
+const line = buildLine(dataset, "cylinderline", "blue", 2);
+if (Array.isArray(line)) {
+  line.forEach((mesh) => scene.add(mesh));
+} else {
+  scene.add(line);
+}
 
 function animate() {
   requestAnimationFrame(animate);
