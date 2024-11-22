@@ -91,6 +91,31 @@ const lineBuilder = {
     return lineSegments;
   },
 
+  /**
+   * Generates a 3D mitred line using cylindrical segments and CSG (Constructive Solid Geometry) for smooth transitions at angles.
+   *
+   * @param {Array<Array<number>>} dataset - Array of [x, y] coordinates defining the line path.
+   * @param {(string|number)} lineColor - The color of the line, can be a hex value or CSS color string.
+   * @param {number} lineWidth - Diameter of the cylindrical segments forming the line.
+   * @param {number} mitreLimit - Maximum allowed mitre length as a multiple of the line width.
+   * @returns {Array<THREE.Mesh>} Array of 3D mesh objects representing the mitred line segments.
+   *
+   * @description
+   * This function creates a mitred line using cylinders and applies CSG operations for smooth transitions at joints between consecutive segments.
+   * Each segment is:
+   * - Constructed as a cylinder scaled and oriented to match the distance and angle between two points.
+   * - Mitred using additional CSG-based cuts if the angle exceeds the specified mitre limit.
+   *
+   * Internally, the function:
+   * 1. Computes segment lengths and angles.
+   * 2. Applies mitre cuts using CSG operations for each joint, respecting the mitre limit.
+   * 3. Adjusts the position and orientation of each segment in the 3D space.
+   *
+   * @example
+   * const data = [[0, 0], [2, 2], [4, 0]];
+   * const mitredLine = lineBuilder.csgmitreline(data, 0xff0000, 0.5, 2); // Red line with 0.5 unit thickness and mitre limit 2
+   * mitredLine.forEach(mesh => scene.add(mesh)); // Add each segment to the scene
+   */
   csgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {
     const radius = lineWidth / 2;
     const maxExcess = mitreLimit * radius;
@@ -129,7 +154,7 @@ const lineBuilder = {
         topCutAngle = getTopCut(
           dataset[i + 1],
           dataset[i + 2],
-          currSegmentAngle,
+          currSegmentAngle
         );
       } else {
         topCutAngle = 0;
