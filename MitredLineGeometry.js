@@ -1,3 +1,5 @@
+const toDegrees = 180 / Math.PI;
+
 import {
   BufferGeometry,
   Float32BufferAttribute,
@@ -27,6 +29,7 @@ const getTopCut = ([x1, y1], [x2, y2], currentSegmentAngle) => {
 };
 class MitredLineGeometry extends BufferGeometry {
   constructor(dataset, radius, radialSegments, mitreLimit) {
+
     super();
 
     this.type = "MitredLineGeometry";
@@ -56,19 +59,8 @@ class MitredLineGeometry extends BufferGeometry {
     this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
 
     function generateTorso() {
-      // generate cover
-      // const lastDataPoint = new Vector3(
-      //   dataset[dataset.length - 1][0],
-      //   dataset[dataset.length - 1][1],
-      //   0
-      // );
+      let bottomAngle = 0;
       let indexRow = [];
-      // for (let x = 0; x <= radialSegments; x++) {
-      //   vertices.push(lastDataPoint.x, lastDataPoint.y, lastDataPoint.z);
-      //   indexRow.push(index++);
-      // }
-      // indexArray.push(indexRow);
-
       for (let i = 0; i < dataset.length - 1; i++) {
         // CALCULATE SEGMENT PARAMETERS
         const currPosition = new Vector2(dataset[i][0], dataset[i][1]);
@@ -80,14 +72,23 @@ class MitredLineGeometry extends BufferGeometry {
         const currSegmentAngle = Math.atan2(deltaXTo1, deltaYTo1);
         const length = Math.hypot(deltaXTo1, deltaYTo1);
 
-        let bottomAngle = 0;
-        let topAngle = 0;
+        
+        let topAngle;
         if (i < dataset.length - 2) {
-          topAngle = getTopCut(dataset[i], dataset[i + 1], currSegmentAngle);
+          const afterNextPosition = new Vector2(
+            dataset[i + 2][0],
+            dataset[i + 2][1]
+          );
+          topAngle = getTopCut(
+            [nextPosition.x, nextPosition.y],
+            [afterNextPosition.x, afterNextPosition.y],
+            currSegmentAngle
+          );
         } else {
           topAngle = 0;
         }
 
+        console.log(topAngle*toDegrees, bottomAngle*toDegrees)
         // CREATE TRANSFORMATION MATRIX
         const matrix = new THREE.Matrix4();
         matrix.makeRotationZ(-currSegmentAngle);
@@ -109,6 +110,7 @@ class MitredLineGeometry extends BufferGeometry {
           vertex.x = radius * sinTheta;
 
           let deltaY = vertex.x * tanTopAngle;
+          
           if (deltaY > maxExcess) {
             deltaY = maxExcess;
 
@@ -192,11 +194,7 @@ class MitredLineGeometry extends BufferGeometry {
 
           vertex.y = deltaY;
           vertex.applyMatrix4(matrix);
-          vertices.push(
-            vertex.x,
-            vertex.y,
-            vertex.z
-          );
+          vertices.push(vertex.x, vertex.y, vertex.z);
 
           // save the index of the vertex just generated into indexRow
           indexRow.push(index++);
