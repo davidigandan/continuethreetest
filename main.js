@@ -274,6 +274,32 @@ const lineBuilder = {
     return lineSegments;
   },
 
+  /**
+   * Generates multiple 3D segments forming a mitred line using cylindrical geometries.
+   *
+   * @param {Array<Array<number>>} dataset - Array of [x, y] coordinates defining the line path.
+   * @param {(string|number)} lineColor - The color of the line segments, can be a hex value or CSS color string.
+   * @param {number} lineWidth - The diameter of the cylindrical segments forming the line.
+   * @param {number} mitreLimit - Maximum allowed mitre length as a multiple of the line width.
+   * @returns {Array<THREE.Mesh>} Array of 3D mesh objects, each representing a segment of the mitred line.
+   *
+   * @description
+   * Creates a line by constructing individual cylindrical segments between consecutive points, with smooth mitre cuts applied
+   * at joint angles. Each segment is:
+   * - A bevelled cylinder with its length and orientation adjusted to match the line path.
+   * - Adjusted for mitre cuts at joints using `BevelledCylinderGeometry`.
+   *
+   * Steps:
+   * 1. Calculates the distance and angle between each pair of consecutive points.
+   * 2. Constructs bevelled cylindrical geometry for each segment.
+   * 3. Adjusts position and orientation based on the dataset coordinates.
+   *
+   * @example
+   * const data = [[0, 0], [1, 1], [2, 0]];
+   * const segments = lineBuilder.manymitredlinegeometry(data, 0x00ff00, 0.5, 2); // Green line
+   * segments.forEach(mesh => scene.add(mesh));
+   */
+
   manymitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
     let meshesOfLine = [];
     const material = new THREE.MeshBasicMaterial({ color: lineColor });
@@ -326,6 +352,29 @@ const lineBuilder = {
     return meshesOfLine;
   },
 
+  /**
+   * Generates a single 3D mesh representing a mitred line, built as one continuous geometry.
+   *
+   * @param {Array<Array<number>>} dataset - Array of [x, y] coordinates defining the line path.
+   * @param {(string|number)} lineColor - The color of the line, can be a hex value or CSS color string.
+   * @param {number} lineWidth - The diameter of the cylindrical line.
+   * @param {number} mitreLimit - Maximum allowed mitre length as a multiple of the line width.
+   * @returns {THREE.Mesh} A single 3D mesh object representing the entire mitred line.
+   *
+   * @description
+   * Constructs a single, continuous 3D line geometry using `MitredLineGeometry`. The geometry is:
+   * - Formed by merging cylindrical segments and applying smooth mitre transitions.
+   * - Optimized for performance by using a single mesh instead of individual segments.
+   *
+   * Internally:
+   * - Utilizes `MitredLineGeometry` to calculate the line's cylindrical segments and mitre cuts.
+   * - Material and radius are applied uniformly across the entire geometry.
+   *
+   * @example
+   * const data = [[0, 0], [2, 2], [4, 0]];
+   * const line = lineBuilder.onemitredlinegeometry(data, 0xff0000, 0.5, 2); // Red line
+   * scene.add(line);
+   */
   onemitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
     const radius = lineWidth / 2;
     const material = new THREE.MeshBasicMaterial({ color: lineColor });
