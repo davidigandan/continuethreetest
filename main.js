@@ -312,7 +312,7 @@ const lineBuilder = {
         topCutAngle,
         bottomCutAngle,
         radialSegments,
-        3
+        mitreLimit
       );
 
       bottomCutAngle = topCutAngle;
