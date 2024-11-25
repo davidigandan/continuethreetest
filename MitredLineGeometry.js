@@ -3,7 +3,10 @@ import {
   Float32BufferAttribute,
   Vector3,
   Vector2,
+  Matrix4,
 } from "three";
+
+import * as THREE from "three";
 
 const getTopCut = ([x1, y1], [x2, y2], currentSegmentAngle) => {
   // NEXT SEGMENT CALCULATIONS
@@ -27,15 +30,12 @@ class MitredLineGeometry extends BufferGeometry {
     super();
 
     this.type = "MitredLineGeometry";
-
     this.parameters = {
       dataset: dataset,
       radius: radius,
       radialSegments: radialSegments,
       mitreLimit,
     };
-
-    radialSegments = Math.floor(radialSegments);
 
     // top and bottom helpers
     const maxExcess = mitreLimit * radius;
@@ -57,19 +57,20 @@ class MitredLineGeometry extends BufferGeometry {
 
     function generateTorso() {
       // generate cover
-      const lastDataPoint = new Vector3(
-        dataset[dataset.length - 1][0],
-        dataset[dataset.length - 1][1],
-        0
-      );
+      // const lastDataPoint = new Vector3(
+      //   dataset[dataset.length - 1][0],
+      //   dataset[dataset.length - 1][1],
+      //   0
+      // );
       let indexRow = [];
-      for (let x = 0; x <= radialSegments; x++) {
-        vertices.push(lastDataPoint.x, lastDataPoint.y, lastDataPoint.z);
-        indexRow.push(index++);
-      }
-      indexArray.push(indexRow);
+      // for (let x = 0; x <= radialSegments; x++) {
+      //   vertices.push(lastDataPoint.x, lastDataPoint.y, lastDataPoint.z);
+      //   indexRow.push(index++);
+      // }
+      // indexArray.push(indexRow);
 
       for (let i = 0; i < dataset.length - 1; i++) {
+        // CALCULATE SEGMENT PARAMETERS
         const currPosition = new Vector2(dataset[i][0], dataset[i][1]);
         const nextPosition = new Vector2(dataset[i + 1][0], dataset[i + 1][1]);
 
@@ -77,16 +78,22 @@ class MitredLineGeometry extends BufferGeometry {
         const deltaYTo1 = nextPosition.y - currPosition.y;
 
         const currSegmentAngle = Math.atan2(deltaXTo1, deltaYTo1);
+        const length = Math.hypot(deltaXTo1, deltaYTo1);
 
-        let bottomAngle;
-        let topAngle;
+        let bottomAngle = 0;
+        let topAngle = 0;
         if (i < dataset.length - 2) {
           topAngle = getTopCut(dataset[i], dataset[i + 1], currSegmentAngle);
         } else {
           topAngle = 0;
         }
 
-        // generate vertices
+        // CREATE TRANSFORMATION MATRIX
+        const matrix = new THREE.Matrix4();
+        matrix.makeRotationZ(-currSegmentAngle);
+        matrix.setPosition(currPosition.x, currPosition.y, 0);
+
+        // GENERATE VERTICES
         const vertex = new Vector3();
         const tanTopAngle = Math.tan(-topAngle);
 
@@ -132,11 +139,8 @@ class MitredLineGeometry extends BufferGeometry {
           }
 
           vertex.y = length + deltaY;
-          vertices.push(
-            vertex.x + nextPosition.x,
-            vertex.y + nextPosition.y,
-            vertex.z
-          );
+          vertex.applyMatrix4(matrix);
+          vertices.push(vertex.x, vertex.y, vertex.z);
 
           // save the index of the vertex just generated into indexRow
           indexRow.push(index++);
@@ -187,9 +191,10 @@ class MitredLineGeometry extends BufferGeometry {
           }
 
           vertex.y = deltaY;
+          vertex.applyMatrix4(matrix);
           vertices.push(
-            vertex.x + currPosition.x,
-            vertex.y + currPosition.y,
+            vertex.x,
+            vertex.y,
             vertex.z
           );
 
@@ -197,7 +202,10 @@ class MitredLineGeometry extends BufferGeometry {
           indexRow.push(index++);
         }
         indexArray.push(indexRow);
+
+        bottomAngle = topAngle;
       }
+
       // generate bottom cover
       indexRow = [];
       for (let x = 0; x <= radialSegments; x++) {
@@ -208,7 +216,7 @@ class MitredLineGeometry extends BufferGeometry {
 
       // generate all indices
       for (let x = 0; x < radialSegments; x++) {
-        for (let y = 0; y < 3; y++) {
+        for (let y = 0; y < indexArray.length - 1; y ++) {
           // assemble a square
 
           const a = indexArray[y][x];

@@ -285,6 +285,7 @@ const lineBuilder = {
     );
 
     const mesh = new THREE.Mesh(lineGeometry, material);
+    return mesh
   },
 
   // disposals: geometries, lines, meshes, materials = null
