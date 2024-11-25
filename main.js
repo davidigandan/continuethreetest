@@ -50,17 +50,15 @@ const lineBuilder = {
     const topCutAngle = relativeAngle / 2;
     return topCutAngle;
   },
-  /**
-   * Creates a simple line through the given data points using THREE.Line
-   * @param {Array<Array<number>>} dataset - Array of [x,y] coordinates defining the line vertices
-   * @param {(string|number)} lineColor - Color of the line, can be hex number or CSS color string
-   * @returns {THREE.Line} A single THREE.Line object representing the path
-   *
-   * @example
-   * const data = [[0,0], [1,1], [2,0]];
-   * const line = onethinline(data, 0x0000ff); // Blue line
-   * scene.add(line);
-   */
+/**
+ * Creates a simple line through the given data points using `THREE.Line`.
+ *
+ * @param {Array<Array<number>>} dataset - An array of [x, y] coordinates defining the line vertices.
+ * @param {(string|number)} lineColor - The color of the line, specified as a hex value or CSS color string.
+ * @returns {THREE.Line} A single `THREE.Line` object representing the path.
+ *
+ * @see {@link onemitredlinegeometry} for a detailed example of how to create and add a line to a scene.
+ */
   onethinline: (dataset, lineColor) => {
     const points = dataset.map(
       (point) => new THREE.Vector3(point[0], point[1], 0)
@@ -72,22 +70,21 @@ const lineBuilder = {
   },
 
   /**
-   * Creates multiple individual line segments from consecutive points in the dataset
-   * @param {Array<Array<number>>} dataset - Array of [x,y] coordinates defining the line vertices
-   * @param {(string|number)} lineColor - Color of the line segments, can be hex number or CSS color string
-   * @returns {Array<THREE.Line>} Array of individual line segments, each connecting two consecutive points
+   * Creates multiple individual line segments from consecutive points in the dataset.
+   *
+   * @param {Array<Array<number>>} dataset - An array of [x, y] coordinates defining the line vertices.
+   * @param {(string|number)} lineColor - The color of the line segments, specified as a hex value or CSS color string.
+   * @returns {Array<THREE.Line>} An array of individual line segments, each connecting two consecutive points.
    *
    * @description
-   * Unlike thinline which creates one continuous line, this creates separate line segments.
+   * Constructs separate line segments between each pair of consecutive points in the dataset.
    * Each segment is:
-   * - An independent THREE.Line object
-   * - Connects exactly two consecutive points
+   * - An independent `THREE.Line` object.
+   * - Aligned to connect exactly two consecutive points.
    *
-   * @example
-   * const data = [[0,0], [40,40], [80,0], [120,40]];
-   * const segments = manythinlines(data, "green");
-   * segments.forEach(segment => scene.add(segment));
+   * @see {@link onemitredlinegeometry} for a detailed example of how to create and add a line to a scene.
    */
+
   manythinlines: (dataset, lineColor) => {
     let lineSegments = [];
     const material = new THREE.LineBasicMaterial({ color: lineColor });
@@ -105,22 +102,21 @@ const lineBuilder = {
   },
 
   /**
-   * Creates a 3D line using cylindrical segments between consecutive points
-   * @param {Array<Array<number>>} dataset - Array of [x,y] coordinates defining the line path
-   * @param {(string|number)} lineColor - Color of the line, can be hex number or CSS color string
-   * @param {number} lineWidth - Diameter of the cylindrical segments
-   * @returns {Array<THREE.Mesh>} Array of cylindrical meshes forming the line segments
+   * Creates a 3D line composed of cylindrical segments between consecutive points.
+   *
+   * @param {Array<Array<number>>} dataset - An array of [x, y] coordinates defining the line path.
+   * @param {(string|number)} lineColor - The line color, specified as a hex value or CSS color string.
+   * @param {number} lineWidth - The diameter of the cylindrical segments.
+   * @returns {Array<THREE.Mesh>} An array of cylindrical meshes representing the line segments.
    *
    * @description
-   * Creates a line by placing cylinders between consecutive points. Each cylinder is:
-   * - Oriented using atan2 to point to the next coordinate
-   * - Scaled to exactly reach between its two defining points
-   * - Positioned at the starting point of its segment
+   * Constructs a 3D line by connecting each pair of consecutive points in the dataset with a cylindrical segment.
+   * Each cylinder is:
+   * - Positioned at the starting point of its segment.
+   * - Scaled to span the exact distance between two points.
+   * - Rotated to align with the direction to the next point, calculated using `atan2`.
    *
-   * @example
-   * const data = [[0,0], [1,1], [2,0]];
-   * const segments = cylinderline(data, 0x0000ff, 0.1); // Blue line, 0.1 units thick
-   * segments.forEach(mesh => scene.add(mesh));
+   * @see {@link onemitredlinegeometry} for a detailed example of how to create and add a line to a scene.
    */
   cylinderline: (dataset, lineColor, lineWidth) => {
     let lineSegments = [];
@@ -145,29 +141,29 @@ const lineBuilder = {
   },
 
   /**
-   * Generates a 3D mitred line using cylindrical segments and CSG (Constructive Solid Geometry) for smooth transitions at angles.
+   * Creates a 3D mitred line using cylindrical segments with smooth transitions at joints, leveraging Constructive Solid Geometry (CSG).
    *
-   * @param {Array<Array<number>>} dataset - Array of [x, y] coordinates defining the line path.
-   * @param {(string|number)} lineColor - The color of the line, can be a hex value or CSS color string.
-   * @param {number} lineWidth - Diameter of the cylindrical segments forming the line.
-   * @param {number} mitreLimit - Maximum allowed mitre length as a multiple of the line width.
-   * @returns {Array<THREE.Mesh>} Array of 3D mesh objects representing the mitred line segments.
+   * @param {Array<Array<number>>} dataset - An array of [x, y] coordinates defining the line path.
+   * @param {(string|number)} lineColor - Color of the line, specified as a hex value or CSS color string.
+   * @param {number} lineWidth - The diameter of the cylindrical segments forming the line.
+   * @param {number} mitreLimit - Maximum mitre length, expressed as a multiple of the line width.
+   * @returns {Array<THREE.Mesh>} An array of 3D mesh objects representing individual mitred line segments.
    *
    * @description
-   * This function creates a mitred line using cylinders and applies CSG operations for smooth transitions at joints between consecutive segments.
-   * Each segment is:
-   * - Constructed as a cylinder scaled and oriented to match the distance and angle between two points.
-   * - Mitred using additional CSG-based cuts if the angle exceeds the specified mitre limit.
+   * Constructs a 3D mitred line by:
+   * - Generating cylindrical segments for each line segment.
+   * - Applying CSG-based cuts at joint angles to create smooth transitions, constrained by the `mitreLimit`.
    *
-   * Internally, the function:
-   * 1. Computes segment lengths and angles.
-   * 2. Applies mitre cuts using CSG operations for each joint, respecting the mitre limit.
-   * 3. Adjusts the position and orientation of each segment in the 3D space.
+   * Each segment:
+   * - Matches the distance and angle between two consecutive points.
+   * - Is adjusted for mitre cuts when joint angles exceed the specified limit.
    *
    * @example
    * const data = [[0, 0], [2, 2], [4, 0]];
-   * const mitredLine = lineBuilder.csgmitreline(data, 0xff0000, 0.5, 2); // Red line with 0.5 unit thickness and mitre limit 2
-   * mitredLine.forEach(mesh => scene.add(mesh)); // Add each segment to the scene
+   * const mitredLine = lineBuilder.csgmitreline(data, 0xff0000, 0.5, 2); // Red line, 0.5 units thick, mitre limit 2
+   * mitredLine.forEach(mesh => scene.add(mesh)); // Add segments to the scene
+   *
+   * @see {@link onemitredlinegeometry} for an exmaple of how to call the function.
    */
   csgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {
     const radius = lineWidth / 2;
@@ -289,17 +285,9 @@ const lineBuilder = {
    * - A bevelled cylinder with its length and orientation adjusted to match the line path.
    * - Adjusted for mitre cuts at joints using `BevelledCylinderGeometry`.
    *
-   * Steps:
-   * 1. Calculates the distance and angle between each pair of consecutive points.
-   * 2. Constructs bevelled cylindrical geometry for each segment.
-   * 3. Adjusts position and orientation based on the dataset coordinates.
    *
-   * @example
-   * const data = [[0, 0], [1, 1], [2, 0]];
-   * const segments = lineBuilder.manymitredlinegeometry(data, 0x00ff00, 0.5, 2); // Green line
-   * segments.forEach(mesh => scene.add(mesh));
+   * @see {@link onemitredlinegeometry} for examples of a similar function that creates a single geometry and how to call it.
    */
-
   manymitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
     let meshesOfLine = [];
     const material = new THREE.MeshBasicMaterial({ color: lineColor });
@@ -365,10 +353,6 @@ const lineBuilder = {
    * Constructs a single, continuous 3D line geometry using `MitredLineGeometry`. The geometry is:
    * - Formed by merging cylindrical segments and applying smooth mitre transitions.
    * - Optimized for performance by using a single mesh instead of individual segments.
-   *
-   * Internally:
-   * - Utilizes `MitredLineGeometry` to calculate the line's cylindrical segments and mitre cuts.
-   * - Material and radius are applied uniformly across the entire geometry.
    *
    * @example
    * const data = [[0, 0], [2, 2], [4, 0]];
