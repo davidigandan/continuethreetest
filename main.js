@@ -81,7 +81,6 @@ const lineBuilder = {
    * Each segment is:
    * - An independent THREE.Line object
    * - Connects exactly two consecutive points
-   * - Can be manipulated (transformed, colored) individually
    *
    * @example
    * const data = [[0,0], [40,40], [80,0], [120,40]];
@@ -304,7 +303,7 @@ function buildLine(
   return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-const line = buildLine(dataset, "manythinlines", "blue");
+const line = buildLine(dataset, "bcgmitreline", "blue", 1);
 if (Array.isArray(line)) {
   line.forEach((element) => scene.add(element));
 } else {

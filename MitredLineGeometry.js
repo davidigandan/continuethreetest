@@ -1,5 +1,3 @@
-const toDegrees = 180 / Math.PI;
-
 import {
   BufferGeometry,
   Float32BufferAttribute,
@@ -7,15 +5,32 @@ import {
   Vector2,
 } from "three";
 
+const getTopCut = ([x1, y1], [x2, y2], currentSegmentAngle) => {
+  // NEXT SEGMENT CALCULATIONS
+  // change between points dp[current+1] and dp[current+2]
+  const deltaX1To2 = x2 - x1;
+  const deltaY1To2 = y2 - y1;
+
+  let nextSegmentAngle = Math.atan2(deltaX1To2, deltaY1To2);
+
+  // Normalise angles greater than PI to their negative equivalents
+  if (nextSegmentAngle >= Math.PI) {
+    nextSegmentAngle = nextSegmentAngle - 2 * Math.PI;
+  }
+  const relativeAngle = nextSegmentAngle - currentSegmentAngle;
+
+  const topCutAngle = relativeAngle / 2;
+  return topCutAngle;
+};
 class MitredLineGeometry extends BufferGeometry {
-  constructor(dataset, lineWidth, radialSegments, mitreLimit) {
+  constructor(dataset, radius, radialSegments, mitreLimit) {
     super();
 
     this.type = "MitredLineGeometry";
 
     this.parameters = {
       dataset: dataset,
-      lineWidth: lineWidth,
+      radius: radius,
       radialSegments: radialSegments,
       mitreLimit,
     };
@@ -24,9 +39,6 @@ class MitredLineGeometry extends BufferGeometry {
 
     // top and bottom helpers
     const maxExcess = mitreLimit * radius;
-    const topExcess = radius * Math.tan(topAngle);
-    const bottomExcess = radius * Math.tan(bottomAngle);
-    const midHeight = (length - topExcess + bottomExcess) / 2;
 
     // buffers
     const indices = [];
@@ -58,6 +70,22 @@ class MitredLineGeometry extends BufferGeometry {
       indexArray.push(indexRow);
 
       for (let i = 0; i < dataset.length - 1; i++) {
+        const currPosition = new Vector2(dataset[i][0], dataset[i][1]);
+        const nextPosition = new Vector2(dataset[i + 1][0], dataset[i + 1][1]);
+
+        const deltaXTo1 = nextPosition.x - currPosition.x;
+        const deltaYTo1 = nextPosition.y - currPosition.y;
+
+        const currSegmentAngle = Math.atan2(deltaXTo1, deltaYTo1);
+
+        let bottomAngle;
+        let topAngle;
+        if (i < dataset.length - 2) {
+          topAngle = getTopCut(dataset[i], dataset[i + 1], currSegmentAngle);
+        } else {
+          topAngle = 0;
+        }
+
         // generate vertices
         const vertex = new Vector3();
         const tanTopAngle = Math.tan(-topAngle);
@@ -104,7 +132,11 @@ class MitredLineGeometry extends BufferGeometry {
           }
 
           vertex.y = length + deltaY;
-          vertices.push(vertex.x, vertex.y, vertex.z);
+          vertices.push(
+            vertex.x + nextPosition.x,
+            vertex.y + nextPosition.y,
+            vertex.z
+          );
 
           // save the index of the vertex just generated into indexRow
           indexRow.push(index++);
@@ -155,7 +187,11 @@ class MitredLineGeometry extends BufferGeometry {
           }
 
           vertex.y = deltaY;
-          vertices.push(vertex.x, vertex.y, vertex.z);
+          vertices.push(
+            vertex.x + currPosition.x,
+            vertex.y + currPosition.y,
+            vertex.z
+          );
 
           // save the index of the vertex just generated into indexRow
           indexRow.push(index++);
