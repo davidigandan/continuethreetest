@@ -296,8 +296,8 @@ function buildLine(
   dataset,
   lineType,
   lineColor,
-  lineWidth = null,
-  mitreLimit = null
+  lineWidth,
+  mitreLimit
 ) {
   const builderFunction = lineBuilder[lineType];
   if (!builderFunction) throw new Error(`Unknown line type: ${lineType}`);
