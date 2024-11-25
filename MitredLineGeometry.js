@@ -216,7 +216,7 @@ class MitredLineGeometry extends BufferGeometry {
 
       // generate all indices
       for (let x = 0; x < radialSegments; x++) {
-        for (let y = 0; y < indexArray.length - 1; y ++) {
+        for (let y = 0; y < indexArray.length - 1; y +=2) {
           // assemble a square
 
           const a = indexArray[y][x];
