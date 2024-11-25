@@ -27,6 +27,7 @@ const getTopCut = ([x1, y1], [x2, y2], currentSegmentAngle) => {
   const topCutAngle = relativeAngle / 2;
   return topCutAngle;
 };
+
 class MitredLineGeometry extends BufferGeometry {
   constructor(dataset, radius, radialSegments, mitreLimit) {
 

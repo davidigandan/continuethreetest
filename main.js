@@ -5,6 +5,7 @@ import { generateRandom } from "./analysis/generateData";
 import { Vector3 } from "three/src/Three.js";
 import { CSG } from "three-csg-ts";
 import { MitredLineGeometry } from "./MitredLineGeometry";
+import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry";
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
@@ -22,7 +23,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const dataset = generateRandom(0, 30000, 1, 0, 50, 5);
+const dataset = generateRandom(0, 300, 1, 0, 50, 5);
 // const dataset = [
 //   [0, 0],
 //   [40, 40],
@@ -273,7 +274,59 @@ const lineBuilder = {
     return lineSegments;
   },
 
-  bcgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {
+  manymitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
+    let meshesOfLine = [];
+    const material = new THREE.MeshBasicMaterial({ color: lineColor });
+    const radius = lineWidth / 2;
+    const radialSegments = 36;
+
+    let bottomCutAngle = 0;
+    let topCutAngle;
+
+    for (let i = 0; i < dataset.length - 1; i++) {
+      //don't compose a segment on last datapoint
+
+      const deltaXTo1 = dataset[i + 1][0] - dataset[i][0];
+      const deltaYTo1 = dataset[i + 1][1] - dataset[i][1];
+
+      const currPosition = new THREE.Vector2(dataset[i][0], dataset[i][1]);
+
+      const length = Math.hypot(deltaXTo1, deltaYTo1);
+      const currSegmentAngle = Math.atan2(deltaXTo1, deltaYTo1);
+
+      let topCutAngle;
+      if (i < dataset.length - 2) {
+        topCutAngle = lineBuilder["getTopCut"](
+          dataset[i + 1],
+          dataset[i + 2],
+          currSegmentAngle,
+          i
+        );
+      } else {
+        topCutAngle = 0;
+      }
+
+      const segment = new BevelledCylinderGeometry(
+        length,
+        radius,
+        topCutAngle,
+        bottomCutAngle,
+        radialSegments,
+        3
+      );
+
+      bottomCutAngle = topCutAngle;
+
+      const meshSegment = new THREE.Mesh(segment, material);
+      meshSegment.position.set(currPosition.x, currPosition.y, 0);
+      meshSegment.rotateZ(-currSegmentAngle);
+      meshesOfLine.push(meshSegment);
+    }
+
+    return meshesOfLine;
+  },
+
+  onemitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
     const radius = lineWidth / 2;
     const material = new THREE.MeshBasicMaterial({ color: lineColor });
 
@@ -285,29 +338,22 @@ const lineBuilder = {
     );
 
     const mesh = new THREE.Mesh(lineGeometry, material);
-    return mesh
+    return mesh;
   },
 
   // disposals: geometries, lines, meshes, materials = null
 };
-
 // returns either a mesh or a line object that can be added to a scene
-function buildLine(
-  dataset,
-  lineType,
-  lineColor,
-  lineWidth,
-  mitreLimit
-) {
+function buildLine(dataset, lineType, lineColor, lineWidth, mitreLimit) {
   const builderFunction = lineBuilder[lineType];
   if (!builderFunction) throw new Error(`Unknown line type: ${lineType}`);
   return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-let timeTaken = -performance.now()
-const line = buildLine(dataset, "manythinlines", "blue", 0.5,3);
-timeTaken += performance.now()
-console.log(`Takes: ${timeTaken/1000}`)
+let timeTaken = -performance.now();
+const line = buildLine(dataset, "manymitredlinegeometry", "red", 1, 2);
+timeTaken += performance.now();
+console.log(`Takes: ${timeTaken / 1000}`);
 
 if (Array.isArray(line)) {
   line.forEach((element) => scene.add(element));
