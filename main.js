@@ -387,7 +387,7 @@ function buildLine(dataset, lineType, lineColor, lineWidth, mitreLimit) {
 }
 
 let timeTaken = -performance.now();
-const line = buildLine(dataset, "manymitredlinegeometry", "#0000ff", 1, 2); // Build the line
+const line = buildLine(dataset, "onemitredlinegeometry", "#0000ff", 2, 50); // Use the same defaults as in controls
 timeTaken += performance.now();
 console.log(`Takes: ${timeTaken / 1000}`);
 
@@ -423,15 +423,7 @@ function updateCanvas() {
   const color = document.getElementById("linecolor").value;
   const width = document.getElementById("linewidth").value;
   const mitreLimit = document.getElementById("mitrelimit").value;
-  const lines = {
-    onethinLine: document.getElementById("onethinline").checked,
-    manythinLines: document.getElementById("manythinlines").checked,
-    cylinderline: document.getElementById("cylinderline").checked,
-    csgmitreline: document.getElementById("csgmitreline").checked,
-    manymitredlinegeometry: document.getElementById("manymitredlinegeometry").checked,
-    onemitredlinegeometry: document.getElementById("onemitredlinegeometry").checked,
-  };
-
+  
   // Repaint the scene
   clearScene(scene);
   // Check each line type and add if checked
@@ -445,6 +437,7 @@ function updateCanvas() {
     }
   }
 
+  renderer.render(scene, camera)
 }
 
 function clearScene(scene) {
