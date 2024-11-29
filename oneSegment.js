@@ -2,7 +2,7 @@ const toDegrees = 180 / Math.PI;
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry.js";
+import { BevelledCylinderGeometry } from "./MitredLineGeometry.js";
 import { makeMitreSegment, makeMitreSegment2 } from "./makeSegment.js";
 
 // Setup scene, camera, renderer

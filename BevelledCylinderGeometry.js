@@ -1,5 +1,3 @@
-const toDegrees = 180 / Math.PI;
-
 import {
   BufferGeometry,
   Float32BufferAttribute,
