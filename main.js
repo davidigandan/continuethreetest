@@ -7,6 +7,7 @@ import { CSG } from "three-csg-ts";
 import { MitredLineGeometry } from "./MitredLineGeometry";
 import { BevelledCylinderGeometry } from "./BevelledCylinderGeometry";
 
+// Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
 const camera = new THREE.PerspectiveCamera(
@@ -24,13 +25,8 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
 const dataset = generateRandom(0, 300, 1, 0, 50, 5);
-// const dataset = [
-//   [0, 0],
-//   [40, 40],
-//   [80, 0],
-//   [120,40],
-// ];
 
+// Types of lines that can be drawn
 const lineBuilder = {
   // helper function
   getTopCut: ([x1, y1], [x2, y2], currentSegmentAngle) => {
@@ -50,15 +46,15 @@ const lineBuilder = {
     const topCutAngle = relativeAngle / 2;
     return topCutAngle;
   },
-/**
- * Creates a simple line through the given data points using `THREE.Line`.
- *
- * @param {Array<Array<number>>} dataset - An array of [x, y] coordinates defining the line vertices.
- * @param {(string|number)} lineColor - The color of the line, specified as a hex value or CSS color string.
- * @returns {THREE.Line} A single `THREE.Line` object representing the path.
- *
- * @see {@link onemitredlinegeometry} for a detailed example of how to create and add a line to a scene.
- */
+  /**
+   * Creates a simple line through the given data points using `THREE.Line`.
+   *
+   * @param {Array<Array<number>>} dataset - An array of [x, y] coordinates defining the line vertices.
+   * @param {(string|number)} lineColor - The color of the line, specified as a hex value or CSS color string.
+   * @returns {THREE.Line} A single `THREE.Line` object representing the path.
+   *
+   * @see {@link onemitredlinegeometry} for a detailed example of how to create and add a line to a scene.
+   */
   onethinline: (dataset, lineColor) => {
     const points = dataset.map(
       (point) => new THREE.Vector3(point[0], point[1], 0)
@@ -384,19 +380,90 @@ function buildLine(dataset, lineType, lineColor, lineWidth, mitreLimit) {
 }
 
 let timeTaken = -performance.now();
-const line = buildLine(dataset, "manymitredlinegeometry", "red", 1, 2);
+const line = buildLine(dataset, "manymitredlinegeometry", "green", 1, 2); // Build the line
 timeTaken += performance.now();
 console.log(`Takes: ${timeTaken / 1000}`);
 
-if (Array.isArray(line)) {
-  line.forEach((element) => scene.add(element));
-} else {
-  scene.add(line);
-}
+addToScene(line);
 
+// Rerender the canvas with every new frame
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
 
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
 animate();
+
+// ------------------------------------------------------------UI CONTORLS---------------------------------------------------------------------------
+
+// Event listeners for all contorls
+document.getElementById("linecolor").addEventListener("input", updateCanvas);
+document.getElementById("linewidth").addEventListener("input", updateCanvas);
+document.getElementById("mitrelimit").addEventListener("input", updateCanvas);
+const checkboxes = document.querySelectorAll(".form-check-input");
+checkboxes.forEach((checkbox) => {
+  checkbox.addEventListener("change", updateCanvas);
+});
+
+function updateCanvas() {
+  // Get all new attributes
+  const color = document.getElementById("linecolor").value;
+  const width = document.getElementById("linewidth").value;
+  const mitreLimit = document.getElementById("mitrelimit").value;
+  const lines = {
+    oneThinLine: document.getElementById("onethinline").checked,
+    manyThinLines: document.getElementById("manythinlines").checked,
+    cylinderLine: document.getElementById("cylinderline").checked,
+    csgMitreLine: document.getElementById("csgmitreline").checked,
+    mmlGeometry: document.getElementById("manymitredlinegeometry").checked,
+    omlGeometry: document.getElementById("onemitredlinegeometry").checked,
+  };
+
+  // Repaint the scene
+  clearScene(scene);
+  // Check each line type and add if checked
+  for (const lineType in lineBuilder) {
+
+    // Skip the helper function
+    if (lineType !== "getTopCut") {
+      if (document.getElementById(lineType).checked) {
+        const line = buildLine(dataset, lineType, color, width, mitreLimit);
+        addToScene(line);
+      }
+    }
+  }
+
+  // Call for a re-render
+  animate();
+}
+
+function clearScene(scene) {
+  while (scene.children.length > 0) {
+    const object = scene.children[0];
+    if (object.geometry) object.geometry.dispose(); // Dispose geometry
+    if (object.material) {
+      if (Array.isArray(object.material)) {
+        object.material.forEach((material) => material.dispose()); // Dispose materials array
+      } else {
+        object.material.dispose(); // Dispose singlar material
+      }
+    }
+    if (object.texture) object.texture.dispose(); // Dispose texture (if applicable)
+    scene.remove(object); // Remove object from the scene
+  }
+}
+
+// Add each line segment or each line to scene. Depends on strategy used to create line
+function addToScene(line) {
+  if (Array.isArray(line)) {
+    line.forEach((element) => scene.add(element));
+  } else {
+    scene.add(line);
+  }
+}
