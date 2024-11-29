@@ -30,7 +30,6 @@ const getTopCut = ([x1, y1], [x2, y2], currentSegmentAngle) => {
 
 class MitredLineGeometry extends BufferGeometry {
   constructor(dataset, radius, radialSegments, mitreLimit) {
-
     super();
 
     this.type = "MitredLineGeometry";
@@ -73,7 +72,6 @@ class MitredLineGeometry extends BufferGeometry {
         const currSegmentAngle = Math.atan2(deltaXTo1, deltaYTo1);
         const length = Math.hypot(deltaXTo1, deltaYTo1);
 
-        
         let topAngle;
         if (i < dataset.length - 2) {
           const afterNextPosition = new Vector2(
@@ -89,7 +87,7 @@ class MitredLineGeometry extends BufferGeometry {
           topAngle = 0;
         }
 
-        console.log(topAngle*toDegrees, bottomAngle*toDegrees)
+        console.log(topAngle * toDegrees, bottomAngle * toDegrees);
         // CREATE TRANSFORMATION MATRIX
         const matrix = new THREE.Matrix4();
         matrix.makeRotationZ(-currSegmentAngle);
@@ -102,6 +100,7 @@ class MitredLineGeometry extends BufferGeometry {
         indexRow = [];
         let prevPointBelowLimit = true; // previous point was below the limit
         for (let x = 0; x <= radialSegments; x++) {
+          //TODO1/2: Generate top cover
           const u = x / radialSegments;
           const theta = u * 2 * Math.PI;
           const sinTheta = Math.sin(theta);
@@ -111,7 +110,7 @@ class MitredLineGeometry extends BufferGeometry {
           vertex.x = radius * sinTheta;
 
           let deltaY = vertex.x * tanTopAngle;
-          
+
           if (deltaY > maxExcess) {
             deltaY = maxExcess;
 
@@ -155,6 +154,7 @@ class MitredLineGeometry extends BufferGeometry {
         const tanBottomAngle = Math.tan(bottomAngle);
         let prevPointAboveLimit = true;
         for (let x = 0; x <= radialSegments; x++) {
+          // TODO 2/2: Generate bottom cover
           const u = x / radialSegments;
           const theta = u * 2 * Math.PI;
           const sinTheta = Math.sin(theta);
@@ -215,7 +215,7 @@ class MitredLineGeometry extends BufferGeometry {
 
       // generate all indices
       for (let x = 0; x < radialSegments; x++) {
-        for (let y = 0; y < indexArray.length - 1; y +=2) {
+        for (let y = 0; y < indexArray.length - 1; y += 2) {
           // assemble a square
 
           const a = indexArray[y][x];

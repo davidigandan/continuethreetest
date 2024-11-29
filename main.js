@@ -392,7 +392,7 @@ const line = buildLine(dataset, "onemitredlinegeometry", "#0000ff", 0.3, 2); // 
 timeTaken += performance.now();
 console.log(`Takes: ${timeTaken / 1000}`);
 
-addToScene(line);
+addToScene(line); // defined in UI controls
 
 // Rerender the canvas with every new frame
 function animate() {
