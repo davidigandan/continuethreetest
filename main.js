@@ -90,7 +90,7 @@ const lineBuilder = {
    */
   manythinlines: (dataset, lineColor) => {
     let lineSegments = [];
-    const material = new THREE.LineBasicMaterial({ color: "green" });
+    const material = new THREE.LineBasicMaterial({ color: "green" }); // overriding color for multi-line visualising
     for (let i = 0; i < dataset.length - 1; i++) {
       const start = new Vector3(dataset[i][0], dataset[i][1], 0);
       const end = new Vector3(dataset[i + 1][0], dataset[i + 1][1], 0);
@@ -133,7 +133,7 @@ const lineBuilder = {
       geometry.rotateZ(-segmentAngle);
       const mesh = new THREE.Mesh(
         geometry,
-        new THREE.MeshBasicMaterial({ color: "orange" })
+        new THREE.MeshBasicMaterial({ color: "orange" }) // overriding color for multi-line visualising
       );
       mesh.position.set(position.x, position.y, position.z);
       lineGroup.add(mesh);
@@ -250,7 +250,7 @@ const lineBuilder = {
       const bottomToOrigin = precutLength / 2 - bottomExcess;
       slicedCylinder.geometry.translate(0, bottomToOrigin, 0);
 
-      const material = new THREE.MeshBasicMaterial({ color: "brown" });
+      const material = new THREE.MeshBasicMaterial({ color: "brown" }); // overriding color for multi-line visualising
       slicedCylinder = new THREE.Mesh(slicedCylinder.geometry, material);
 
       // Disposal
@@ -292,7 +292,7 @@ const lineBuilder = {
    */
   manymitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
     let lineGroup = new THREE.Group();
-    const material = new THREE.MeshBasicMaterial({ color: "black" });
+    const material = new THREE.MeshBasicMaterial({ color: "black" }); // overriding color for multi-line visualising
     const radius = lineWidth / 2;
     const radialSegments = 36;
 
@@ -364,7 +364,7 @@ const lineBuilder = {
    */
   onemitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
     const radius = lineWidth / 2;
-    const material = new THREE.MeshBasicMaterial({ color: "red" });
+    const material = new THREE.MeshBasicMaterial({ color: "red" }); // overriding color for multi-line visualising
 
     const lineGeometry = new MitredLineGeometry(
       dataset,
