@@ -120,7 +120,7 @@ const lineBuilder = {
    * @see {@link onemitredlinegeometry} for a detailed example of how to create and add a line to a scene.
    */
   cylinderline: (dataset, lineColor, lineWidth) => {
-    let lineSegments = [];
+    let lineGroup = new THREE.Group();
     for (let i = 0; i < dataset.length - 1; i++) {
       const deltaX = dataset[i + 1][0] - dataset[i][0];
       const deltaY = dataset[i + 1][1] - dataset[i][1];
@@ -136,10 +136,9 @@ const lineBuilder = {
         new THREE.MeshBasicMaterial({ color: "orange" })
       );
       mesh.position.set(position.x, position.y, position.z);
-
-      lineSegments.push(mesh);
+      lineGroup.add(mesh);
     }
-    return lineSegments;
+    return lineGroup;
   },
 
   /**
