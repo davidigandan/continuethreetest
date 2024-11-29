@@ -24,14 +24,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-// const dataset = generateRandom(0, 10, 1, 0, 50, 5);
+const dataset = generateRandom(0, 300, 1, 0, 50, 5);
 
-const dataset = [
-  [0, 0],
-  [40, 40],
-  [80, 0],
-  [120, 40],
-];
+// const dataset = [
+//   [0, 0],
+//   [40, 40],
+//   [80, 0],
+//   [120, 40],
+// ];
 
 // Types of lines that can be drawn
 const lineBuilder = {
@@ -387,7 +387,7 @@ function buildLine(dataset, lineType, lineColor, lineWidth, mitreLimit) {
 }
 
 let timeTaken = -performance.now();
-const line = buildLine(dataset, "onemitredlinegeometry", "#0000ff", 2, 50); // Use the same defaults as in controls
+const line = buildLine(dataset, "onemitredlinegeometry", "#0000ff", 0.3, 2); // Use the same defaults as in controls
 timeTaken += performance.now();
 console.log(`Takes: ${timeTaken / 1000}`);
 
@@ -423,7 +423,7 @@ function updateCanvas() {
   const color = document.getElementById("linecolor").value;
   const width = document.getElementById("linewidth").value;
   const mitreLimit = document.getElementById("mitrelimit").value;
-  
+
   // Repaint the scene
   clearScene(scene);
   // Check each line type and add if checked
@@ -436,8 +436,6 @@ function updateCanvas() {
       }
     }
   }
-
-  renderer.render(scene, camera)
 }
 
 function clearScene(scene) {
