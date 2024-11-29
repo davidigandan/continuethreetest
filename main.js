@@ -24,7 +24,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const dataset = generateRandom(0, 300, 1, 0, 50, 5);
+const dataset = generateRandom(0, 30, 1, 0, 50, 5);
 
 // const dataset = [
 //   [0, 0],
@@ -69,7 +69,7 @@ const lineBuilder = {
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({ color: lineColor });
     const line = new THREE.Line(geometry, material);
-    line.rotateY(0 * rotationFactorRads); // no ratation about Y
+    line.rotateY(-1 * rotationFactorRads); // no ratation about Y
     return line;
   },
 
@@ -136,7 +136,7 @@ const lineBuilder = {
         new THREE.MeshBasicMaterial({ color: "orange" })
       );
       mesh.position.set(position.x, position.y, position.z);
-      // mesh.rotateY(4 * -rotationFactorRads) // to aid multi-line display, rotate line by a certain amount about Y-axis
+
       lineSegments.push(mesh);
     }
     return lineSegments;
@@ -168,6 +168,7 @@ const lineBuilder = {
    * @see {@link onemitredlinegeometry} for an exmaple of how to call the function.
    */
   csgmitreline: (dataset, lineColor, lineWidth, mitreLimit) => {
+    const lineGroup = new THREE.Group();
     const radius = lineWidth / 2;
     const maxExcess = mitreLimit * radius;
 
@@ -250,7 +251,7 @@ const lineBuilder = {
       const bottomToOrigin = precutLength / 2 - bottomExcess;
       slicedCylinder.geometry.translate(0, bottomToOrigin, 0);
 
-      const material = new THREE.MeshBasicMaterial({ color: lineColor });
+      const material = new THREE.MeshBasicMaterial({ color: "brown" });
       slicedCylinder = new THREE.Mesh(slicedCylinder.geometry, material);
 
       // Disposal
@@ -264,12 +265,12 @@ const lineBuilder = {
       slicedCylinder.rotateZ(-currSegmentAngle);
       slicedCylinder.position.x = dataset[i][0];
       slicedCylinder.position.y = dataset[i][1];
-      lineSegments.push(slicedCylinder);
-
+      // lineSegments.push(slicedCylinder);
+      lineGroup.add(slicedCylinder);
       bottomCutAngle = topCutAngle;
     }
-
-    return lineSegments;
+    lineGroup.rotateY(2 * rotationFactorRads);
+    return lineGroup;
   },
 
   /**
@@ -291,8 +292,8 @@ const lineBuilder = {
    * @see {@link onemitredlinegeometry} for examples of a similar function that creates a single geometry and how to call it.
    */
   manymitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
-    let meshesOfLine = [];
-    const material = new THREE.MeshBasicMaterial({ color: lineColor });
+    let lineGroup = new THREE.Group();
+    const material = new THREE.MeshBasicMaterial({ color: "black" });
     const radius = lineWidth / 2;
     const radialSegments = 36;
 
@@ -336,10 +337,11 @@ const lineBuilder = {
       const meshSegment = new THREE.Mesh(segment, material);
       meshSegment.position.set(currPosition.x, currPosition.y, 0);
       meshSegment.rotateZ(-currSegmentAngle);
-      meshesOfLine.push(meshSegment);
-    }
 
-    return meshesOfLine;
+      lineGroup.add(meshSegment);
+    }
+    lineGroup.rotateY(3 * rotationFactorRads);
+    return lineGroup;
   },
 
   /**
@@ -363,7 +365,7 @@ const lineBuilder = {
    */
   onemitredlinegeometry: (dataset, lineColor, lineWidth, mitreLimit) => {
     const radius = lineWidth / 2;
-    const material = new THREE.MeshBasicMaterial({ color: lineColor });
+    const material = new THREE.MeshBasicMaterial({ color: "red" });
 
     const lineGeometry = new MitredLineGeometry(
       dataset,
@@ -373,6 +375,7 @@ const lineBuilder = {
     );
 
     const mesh = new THREE.Mesh(lineGeometry, material);
+    mesh.rotateY(4 * rotationFactorRads);
     return mesh;
   },
 
@@ -457,7 +460,10 @@ function clearScene(scene) {
 // Add each line segment or each line to scene. Depends on strategy used to create line
 function addToScene(line) {
   if (Array.isArray(line)) {
-    line.forEach((element) => scene.add(element));
+    line.forEach((element) => {
+      element.rotateY(Math.PI / 8);
+      scene.add(element);
+    });
   } else {
     scene.add(line);
   }

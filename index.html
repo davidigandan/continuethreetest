@@ -39,13 +39,13 @@
 
     <!-- Controls -->
     <div class="graph-control">
-      <label>Line Color</label>
+      <label for="linecolor">Line Color</label>
       <input type="color" id="linecolor" value="#0000ff" />
 
-      <label>Line Width</label>
+      <label for="linewidth">Line Width</label>
       <input type="number" id="linewidth" value="0.3" min="0.1" step="0.1"/>
 
-      <label>Mitre Limit</label>
+      <label for="mitrelimit">Mitre Limit</label>
       <input type="number" id="mitrelimit" value="2" min="0" />
 
       <div class="form-check">
@@ -56,7 +56,7 @@
           id="onethinline"
 		  checked
         />
-        <label class="form-check-label" for="flexCheckDefault">
+        <label class="form-check-label" for="onethinline">
           One Thin Line
         </label>
       </div>
@@ -68,7 +68,7 @@
           id="manythinlines"
 		  checked
         />
-        <label class="form-check-label" for="flexCheckChecked">
+        <label class="form-check-label" for="manythinlines">
           Many Thin Lines
         </label>
       </div>
@@ -80,7 +80,7 @@
           id="cylinderline"
 		  checked
         />
-        <label class="form-check-label" for="flexCheckDefault">
+        <label class="form-check-label" for="cylinderline">
           Cylinder Line
         </label>
       </div>
@@ -92,7 +92,7 @@
           id="csgmitreline"
 		  
         />
-        <label class="form-check-label" for="flexCheckChecked">
+        <label class="form-check-label" for="csgmitreline">
           CSG Mitre line (slow)
         </label>
       </div>
@@ -104,7 +104,7 @@
           id="manymitredlinegeometry"
 		  checked
         />
-        <label class="form-check-label" for="flexCheckDefault">
+        <label class="form-check-label" for="manymitredlinegeometry">
           Many Mitred Lines Geometry
         </label>
       </div>
@@ -116,7 +116,7 @@
           id="onemitredlinegeometry"
           checked
         />
-        <label class="form-check-label" for="flexCheckChecked">
+        <label class="form-check-label" for="onemitredlinegeometry">
           One Mitre Line Geometry
         </label>
       </div>
