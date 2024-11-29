@@ -216,13 +216,8 @@ class MitredLineGeometry extends BufferGeometry {
         bottomAngle = topAngle;
       }
 
-      // generate bottom cover
-      indexRow = [];
-      for (let x = 0; x <= radialSegments; x++) {
-        vertices.push(0, 0, 0);
-        indexRow.push(index++);
-      }
-      indexArray.push(indexRow);
+
+  
 
       // generate all indices
       for (let x = 0; x < radialSegments; x++) {
