@@ -43,10 +43,10 @@
       <input type="color" id="linecolor" value="#0000ff" />
 
       <label>Line Width</label>
-      <input type="number" id="linewidth" value="0.3" min="0.1" />
+      <input type="number" id="linewidth" value="0.3" min="0.1" step="0.1"/>
 
       <label>Mitre Limit</label>
-      <input type="number" id="mitrelimit" value="2" />
+      <input type="number" id="mitrelimit" value="2" min="0" />
 
       <div class="form-check">
         <input
@@ -54,6 +54,7 @@
           type="checkbox"
           value=""
           id="onethinline"
+		  checked
         />
         <label class="form-check-label" for="flexCheckDefault">
           One Thin Line
@@ -65,6 +66,7 @@
           type="checkbox"
           value=""
           id="manythinlines"
+		  checked
         />
         <label class="form-check-label" for="flexCheckChecked">
           Many Thin Lines
@@ -76,6 +78,7 @@
           type="checkbox"
           value=""
           id="cylinderline"
+		  checked
         />
         <label class="form-check-label" for="flexCheckDefault">
           Cylinder Line
@@ -87,6 +90,7 @@
           type="checkbox"
           value=""
           id="csgmitreline"
+		  
         />
         <label class="form-check-label" for="flexCheckChecked">
           CSG Mitre line (slow)
@@ -98,6 +102,7 @@
           type="checkbox"
           value=""
           id="manymitredlinegeometry"
+		  checked
         />
         <label class="form-check-label" for="flexCheckDefault">
           Many Mitred Lines Geometry

@@ -18,7 +18,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 camera.position.z = 5;
-
+const rotationFactorRads = 0.261799; // rotate line by a factor of 15 degrees
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -69,6 +69,7 @@ const lineBuilder = {
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({ color: lineColor });
     const line = new THREE.Line(geometry, material);
+    line.rotateY(0 * rotationFactorRads); // no ratation about Y
     return line;
   },
 
@@ -87,18 +88,15 @@ const lineBuilder = {
    *
    * @see {@link onemitredlinegeometry} for a detailed example of how to create and add a line to a scene.
    */
-
   manythinlines: (dataset, lineColor) => {
     let lineSegments = [];
-    const material = new THREE.LineBasicMaterial({ color: lineColor });
+    const material = new THREE.LineBasicMaterial({ color: "green" });
     for (let i = 0; i < dataset.length - 1; i++) {
-      const deltaX = dataset[i + 1][0] - dataset[i][0];
-      const deltaY = dataset[i + 1][1] - dataset[i][1];
-
       const start = new Vector3(dataset[i][0], dataset[i][1], 0);
       const end = new Vector3(dataset[i + 1][0], dataset[i + 1][1], 0);
       const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
       const segment = new THREE.Line(geometry, material);
+      segment.rotateY(1 * rotationFactorRads); // to aid multi-line display, rotate line by a certain amount about Y-axis
       lineSegments.push(segment);
     }
     return lineSegments;
@@ -135,9 +133,10 @@ const lineBuilder = {
       geometry.rotateZ(-segmentAngle);
       const mesh = new THREE.Mesh(
         geometry,
-        new THREE.MeshBasicMaterial({ color: lineColor })
+        new THREE.MeshBasicMaterial({ color: "orange" })
       );
       mesh.position.set(position.x, position.y, position.z);
+      // mesh.rotateY(4 * -rotationFactorRads) // to aid multi-line display, rotate line by a certain amount about Y-axis
       lineSegments.push(mesh);
     }
     return lineSegments;
@@ -396,6 +395,7 @@ addToScene(line);
 // Rerender the canvas with every new frame
 function animate() {
   requestAnimationFrame(animate);
+  updateScene();
   renderer.render(scene, camera);
 }
 
@@ -410,15 +410,15 @@ animate();
 // ------------------------------------------------------------UI CONTORLS---------------------------------------------------------------------------
 
 // Event listeners for all contorls
-document.getElementById("linecolor").addEventListener("input", updateCanvas);
-document.getElementById("linewidth").addEventListener("input", updateCanvas);
-document.getElementById("mitrelimit").addEventListener("input", updateCanvas);
+document.getElementById("linecolor").addEventListener("input", updateScene);
+document.getElementById("linewidth").addEventListener("input", updateScene);
+document.getElementById("mitrelimit").addEventListener("input", updateScene);
 const checkboxes = document.querySelectorAll(".form-check-input");
 checkboxes.forEach((checkbox) => {
-  checkbox.addEventListener("change", updateCanvas);
+  checkbox.addEventListener("change", updateScene);
 });
 
-function updateCanvas() {
+function updateScene() {
   // Get all new attributes
   const color = document.getElementById("linecolor").value;
   const width = document.getElementById("linewidth").value;
