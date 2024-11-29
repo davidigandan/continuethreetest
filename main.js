@@ -24,7 +24,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const dataset = generateRandom(0, 300, 1, 0, 50, 5);
+// const dataset = generateRandom(0, 10, 1, 0, 50, 5);
+
+const dataset = [
+  [0, 0],
+  [40, 40],
+  [80, 0],
+  [120, 40],
+];
 
 // Types of lines that can be drawn
 const lineBuilder = {
@@ -380,7 +387,7 @@ function buildLine(dataset, lineType, lineColor, lineWidth, mitreLimit) {
 }
 
 let timeTaken = -performance.now();
-const line = buildLine(dataset, "manymitredlinegeometry", "green", 1, 2); // Build the line
+const line = buildLine(dataset, "manymitredlinegeometry", "#0000ff", 1, 2); // Build the line
 timeTaken += performance.now();
 console.log(`Takes: ${timeTaken / 1000}`);
 
@@ -417,19 +424,18 @@ function updateCanvas() {
   const width = document.getElementById("linewidth").value;
   const mitreLimit = document.getElementById("mitrelimit").value;
   const lines = {
-    oneThinLine: document.getElementById("onethinline").checked,
-    manyThinLines: document.getElementById("manythinlines").checked,
-    cylinderLine: document.getElementById("cylinderline").checked,
-    csgMitreLine: document.getElementById("csgmitreline").checked,
-    mmlGeometry: document.getElementById("manymitredlinegeometry").checked,
-    omlGeometry: document.getElementById("onemitredlinegeometry").checked,
+    onethinLine: document.getElementById("onethinline").checked,
+    manythinLines: document.getElementById("manythinlines").checked,
+    cylinderline: document.getElementById("cylinderline").checked,
+    csgmitreline: document.getElementById("csgmitreline").checked,
+    manymitredlinegeometry: document.getElementById("manymitredlinegeometry").checked,
+    onemitredlinegeometry: document.getElementById("onemitredlinegeometry").checked,
   };
 
   // Repaint the scene
   clearScene(scene);
   // Check each line type and add if checked
-  for (const lineType in lineBuilder) {
-
+  for (let lineType in lineBuilder) {
     // Skip the helper function
     if (lineType !== "getTopCut") {
       if (document.getElementById(lineType).checked) {
@@ -439,8 +445,6 @@ function updateCanvas() {
     }
   }
 
-  // Call for a re-render
-  animate();
 }
 
 function clearScene(scene) {
