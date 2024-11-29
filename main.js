@@ -460,7 +460,6 @@ function clearScene(scene) {
 function addToScene(line) {
   if (Array.isArray(line)) {
     line.forEach((element) => {
-      element.rotateY(Math.PI / 8);
       scene.add(element);
     });
   } else {
