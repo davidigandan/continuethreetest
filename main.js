@@ -369,9 +369,7 @@ const lineBuilder = {
     const mesh = new THREE.Mesh(lineGeometry, material);
     mesh.rotateY(4 * rotationFactorRads);
     return mesh;
-  },
-
-  // disposals: geometries, lines, meshes, materials = null
+  }
 };
 // returns either a mesh or a line object that can be added to a scene
 function buildLine(dataset, lineType, lineColor, lineWidth, mitreLimit) {

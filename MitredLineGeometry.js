@@ -28,7 +28,19 @@ const getTopCut = ([x1, y1], [x2, y2], currentSegmentAngle) => {
   return topCutAngle;
 };
 
+/**
+ * A geometry class for generating a mitred line mesh based on a dataset of points.
+ * The class extends THREE.BufferGeometry and supports customizations for radius, radial segments, and mitre limit.
+ */
 class MitredLineGeometry extends BufferGeometry {
+  /**
+   * Creates an instance of MitredLineGeometry.
+   *
+   * @param {Array<Array<number>>} dataset - An array of 2D points defining the line path. Each point is represented as [x, y].
+   * @param {number} radius - The radius of the line's cross-section.
+   * @param {number} radialSegments - Number of segments around the circumference of the line's cross-section.
+   * @param {number} mitreLimit - The maximum limit for the mitre adjustments at sharp angles.
+   */
   constructor(dataset, radius, radialSegments, mitreLimit) {
     super();
 
