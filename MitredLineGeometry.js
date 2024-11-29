@@ -87,7 +87,6 @@ class MitredLineGeometry extends BufferGeometry {
           topAngle = 0;
         }
 
-        console.log(topAngle * toDegrees, bottomAngle * toDegrees);
         // CREATE TRANSFORMATION MATRIX
         const matrix = new THREE.Matrix4();
         matrix.makeRotationZ(-currSegmentAngle);

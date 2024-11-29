@@ -24,14 +24,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 
-const dataset = generateRandom(0, 30, 1, 0, 50, 5);
-
-// const dataset = [
-//   [0, 0],
-//   [40, 40],
-//   [80, 0],
-//   [120, 40],
-// ];
+const dataset = generateRandom(0, 3001, 1, 0, 50, 5);
 
 // Types of lines that can be drawn
 const lineBuilder = {
@@ -387,17 +380,11 @@ function buildLine(dataset, lineType, lineColor, lineWidth, mitreLimit) {
   return builderFunction(dataset, lineColor, lineWidth, mitreLimit);
 }
 
-let timeTaken = -performance.now();
-const line = buildLine(dataset, "onemitredlinegeometry", "#0000ff", 0.3, 2); // Use the same defaults as in controls
-timeTaken += performance.now();
-console.log(`Takes: ${timeTaken / 1000}`);
-
-addToScene(line); // defined in UI controls
+updateScene(); // grab UI settings and set the scene
 
 // Rerender the canvas with every new frame
 function animate() {
   requestAnimationFrame(animate);
-  updateScene();
   renderer.render(scene, camera);
 }
 
@@ -428,16 +415,23 @@ function updateScene() {
 
   // Repaint the scene
   clearScene(scene);
+  let allGeoTime=0;
   // Check each line type and add if checked
   for (let lineType in lineBuilder) {
     // Skip the helper function
     if (lineType !== "getTopCut") {
       if (document.getElementById(lineType).checked) {
+        let timeTaken = -performance.now();
         const line = buildLine(dataset, lineType, color, width, mitreLimit);
+        timeTaken += performance.now();
+        allGeoTime += timeTaken / 1000;
+        console.log(`${lineType} takes: ${timeTaken / 1000}`);
         addToScene(line);
       }
     }
   }
+
+  document.getElementById('time-display').textContent = allGeoTime
 }
 
 function clearScene(scene) {
