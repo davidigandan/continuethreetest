@@ -18,19 +18,18 @@ While **Three.js** lacks a Mitred Segment geometry, its **CylinderGeometry** can
 2. **Key Parameters**:
    - **Precut Length**: The cylinder must exceed the distance between two datapoints to ensure proper connection, with constraints applied for acute angles.
    - **Cube Width**: Determined by the angle of the cut:
-     \[
-     \text{topCubeWidth} = \frac{\text{cylinderWidth}}{\cos(\text{topAngle})}
-     \]
+     topCubeWidth = cylinderWidth/Cosine(topAngle)
+     
 
 3. **Joint Angles**:
    - The angle between two segments determines the sum of the angles at the connecting joints:
-     \[
-     \text{relativeSegmentAngle}(A, B) = \text{bottomAngle}_A + \text{topAngle}_B
-     \]
+     
+     relativeSegmentAngle(A, B) = bottomAngle+ topAngle
+    
      Equal angles are preferred for congruent triangles:
-     \[
-     \text{bottomAngle}_A = \text{topAngle}_B = \frac{\text{relativeSegmentAngle}(A, B)}{2}
-     \]
+     
+     bottomAngle= topAngle=relativeSegmentAngle(A, B)/2
+     
 
 4. **Cube Rotation**:
    - The cube’s center is aligned with the datapoint through translation.
