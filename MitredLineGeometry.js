@@ -111,7 +111,7 @@ class MitredLineGeometry extends BufferGeometry {
         indexRow = [];
         let prevPointBelowLimit = true; // previous point was below the limit
         for (let x = 0; x <= radialSegments; x++) {
-          //TODO1/2: Generate top cover
+          //TODO1/3: Generate top cover
           const u = x / radialSegments;
           const theta = u * 2 * Math.PI;
           const sinTheta = Math.sin(theta);
@@ -165,7 +165,7 @@ class MitredLineGeometry extends BufferGeometry {
         const tanBottomAngle = Math.tan(bottomAngle);
         let prevPointAboveLimit = true;
         for (let x = 0; x <= radialSegments; x++) {
-          // TODO 2/2: Generate bottom cover
+          // TODO 2/3: Generate bottom cover
           const u = x / radialSegments;
           const theta = u * 2 * Math.PI;
           const sinTheta = Math.sin(theta);
@@ -222,6 +222,7 @@ class MitredLineGeometry extends BufferGeometry {
       // generate all indices
       for (let x = 0; x < radialSegments; x++) {
         for (let y = 0; y < indexArray.length - 1; y += 2) {
+          // TODO 3/3: Adjust indexing strategy (y+=4) when top and bottom covers added
           // assemble a square
 
           const a = indexArray[y][x];
