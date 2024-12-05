@@ -1,10 +1,10 @@
 # Thick Line Support
 
 ## Aim
-We will use **Three.js** to build custom 3D geometries that can be utilized in **h5web**. 
+We will use **Three.js** to build custom 3D geometries that can be used in **h5web**. 
 
 ### Initial Approaches
-The simplest method to create a line is to connect datapoints with a series of cylinders. However, this introduces unpleasant artifacts at the joints (Figure 1: No joint). To address this, a **Mitre joint** was explored, resulting in more aesthetically pleasing connections where line segments meet at corresponding angles (Figure 2: Mitre Joint; Figure 3: Mitred Segment).
+The simplest method to create a line is to connect datapoints with a series of cylinders. However, this introduces unpleasant artifacts at the joints. To address this, a **Mitre joint** was explored, resulting in more aesthetically pleasing connections where line segments meet at corresponding angles.
 
 ---
 
